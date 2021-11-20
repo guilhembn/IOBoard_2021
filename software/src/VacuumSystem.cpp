@@ -2,21 +2,22 @@
 
 #include <Arduino.h>
 
-VacuumSystem::VacuumSystem(unsigned int pumpPin, unsigned int valvePin, unsigned int vacuumSensorPin): 
-pumpPin_(pumpPin), valvePin_(valvePin), vacuumSensorPin_ (vacuumSensorPin), vacuumDuration_(0), releaseDuration_(0){}
+VacuumSystem::VacuumSystem(unsigned int pumpPin, unsigned int valvePin, unsigned int vacuumSensorPin)
+    : pumpPin_(pumpPin), valvePin_(valvePin), vacuumSensorPin_(vacuumSensorPin), vacuumDuration_(0), releaseDuration_(0) {}
 
-VacuumSystem::VacuumSystem(unsigned int pumpPin, unsigned int valvePin, unsigned int vacuumDuration, unsigned int releaseDuration):
-pumpPin_(pumpPin), valvePin_(valvePin), vacuumSensorPin_(-1), vacuumDuration_(vacuumDuration), releaseDuration_(releaseDuration){}
+VacuumSystem::VacuumSystem(unsigned int pumpPin, unsigned int valvePin, unsigned int vacuumDuration, unsigned int releaseDuration)
+    : pumpPin_(pumpPin), valvePin_(valvePin), vacuumSensorPin_(-1), vacuumDuration_(vacuumDuration), releaseDuration_(releaseDuration) {}
 
-void VacuumSystem::init(){
+void VacuumSystem::init() {
     pinMode(pumpPin_, OUTPUT);
     pinMode(valvePin_, OUTPUT);
-    if (vacuumSensorPin_ != -1){
-        pinMode((uint32_t) vacuumSensorPin_, INPUT);
+    if (vacuumSensorPin_ != -1) {
+        pinMode((uint32_t)vacuumSensorPin_, INPUT);
     }
+    release();
 }
 
-void VacuumSystem::suck(){
+void VacuumSystem::suck() {
     digitalWrite(pumpPin_, HIGH);
     digitalWrite(valvePin_, LOW);
     suckStartTime_ = millis();
@@ -24,7 +25,7 @@ void VacuumSystem::suck(){
     isReleasing_ = false;
 }
 
-void VacuumSystem::release(){
+void VacuumSystem::release() {
     digitalWrite(pumpPin_, LOW);
     digitalWrite(valvePin_, HIGH);
     releaseStartTime_ = millis();
@@ -32,18 +33,26 @@ void VacuumSystem::release(){
     isSucking_ = false;
 }
 
-bool VacuumSystem::isReleased(){
-    if (vacuumSensorPin_ != -1){
+bool VacuumSystem::isReleased() {
+    if (vacuumSensorPin_ != -1) {
         return analogRead(vacuumSensorPin_) >= PRESSURE_SENSOR_ATMO_VALUE;
-    }else{
+    } else {
         return isReleasing_ && (millis() - releaseStartTime_) >= releaseDuration_;
     }
 }
 
-bool VacuumSystem::isVacuumed(){
-    if (vacuumSensorPin_ != -1){
+bool VacuumSystem::isVacuumed() {
+    if (vacuumSensorPin_ != -1) {
         return analogRead(vacuumSensorPin_) <= PRESSURE_SENSOR_VACUUMED_VALUE;
-    }else{
+    } else {
         return isSucking_ && (millis() - suckStartTime_) >= vacuumDuration_;
+    }
+}
+
+int VacuumSystem::pressure() {
+    if (vacuumSensorPin_ != -1) {
+        return analogRead(vacuumSensorPin_);
+    } else {
+        return 0;
     }
 }

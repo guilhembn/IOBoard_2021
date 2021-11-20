@@ -26,6 +26,9 @@ bool isMoving();
 
 void enableZMotor(bool enable);
 
+void grasp();
+void drop();
+
 enum eJoint{
     PRISMATIC_Z = 0,
     REVOLUTE_Z = 1,
@@ -33,6 +36,10 @@ enum eJoint{
 };
 
 void sendPositionCommand(const eJoint joint, const int command);
+int getPosition(const eJoint joint);
+bool isPumpEnabled() {return vacuumSystem_.isPumpOn();}
+bool isValveClosed() {return vacuumSystem_.isValveClosed();}
+int pressure() {return vacuumSystem_.pressure();}
 
 void setZPrimsaticSpeed(int speed);
 void resetZPrimaticPosition();

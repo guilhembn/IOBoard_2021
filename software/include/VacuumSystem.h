@@ -17,6 +17,9 @@ class VacuumSystem{
     bool isReleased();
     void suck();
     void release();
+    bool isPumpOn() { return isSucking_;}
+    bool isValveClosed() {return isSucking_;}
+    int pressure();
 
     protected:
     unsigned int pumpPin_;

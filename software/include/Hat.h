@@ -13,6 +13,7 @@ Hat(unsigned int pumpPin, unsigned int valvePin, unsigned int servoPin1, unsigne
 void init();
 
 void extendTo(const int height);  // Extend the hat to a length of 'height', from the top of the hat (0, is fully up). In mm
+int getHeight();
 
 void grasp();
 void drop();
