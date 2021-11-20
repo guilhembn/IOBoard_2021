@@ -1,3 +1,7 @@
 [submodule "software/lib/EmbeddedProto"]
 	path = software/lib/EmbeddedProto
 	url = https://github.com/Embedded-AMS/EmbeddedProto.git
+[submodule "software/protoduck"]
+	path = software/protoduck
+	url = git@github.com:rustyducks/protoduck.git
+
