@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+message SequenceCommand{
+    enum Sequence{
+        HOME = 0;
+        PUT_ON_STACK = 1;
+        TURN_AND_PUT_ON_STACK = 2;
+        TAKE_FROM_STACK = 3;
+    }
+    Sequence sequence = 1;
+    uint32 param = 2;
+}
+
+message ArmPositionCommand{
+    uint32 z_prismatic_position = 1;
+    uint32 z_rotational_position = 2;
+    uint32 y_rotational_position = 3;
+}
+
+message ArmPumpCommand{
+    bool enable = 1;
+}
+
+
+message HatPositionCommand{
+    uint32 hat_height = 1;
+}
+
+message HatPumpCommand{
+    bool enable = 1;
+}
+
+enum IORequest {
+    ARM_STATUS = 0;
+    HAT_STATUS = 1;
+}
+
+message IOCommand {
+    oneof inner{
+        SequenceCommand sequence_command = 1;
+        ArmPositionCommand arm_position_command = 2;
+        ArmPumpCommand arm_pump_command = 3;
+        HatPositionCommand hat_position_command = 4;
+        HatPumpCommand hat_pump_command = 5;
+        IORequest io_request = 6;        
+    }
+}
