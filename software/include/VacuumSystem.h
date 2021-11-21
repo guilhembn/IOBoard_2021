@@ -17,11 +17,15 @@ class VacuumSystem{
     bool isReleased();
     void suck();
     void release();
-    bool isPumpOn() { return isSucking_;}
-    bool isValveClosed() {return isSucking_;}
+    void startPump(bool start = true);
+    void openValve(bool open = true);
+    bool isPumpOn() { return isPumpOn_;}
+    bool isValveOpen() {return isValveOpen_;}
     int pressure();
 
     protected:
+    void updateState();
+
     unsigned int pumpPin_;
     unsigned int valvePin_;
     int vacuumSensorPin_;
@@ -31,6 +35,8 @@ class VacuumSystem{
     uint32_t suckStartTime_;
     bool isSucking_;
     bool isReleasing_;
+    bool isPumpOn_;
+    bool isValveOpen_;
 };
 
 #endif /* VACUUMSYSTEM_H */

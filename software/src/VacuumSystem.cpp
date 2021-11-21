@@ -15,22 +15,29 @@ void VacuumSystem::init() {
         pinMode((uint32_t)vacuumSensorPin_, INPUT);
     }
     release();
+    openValve(false);
+}
+
+void VacuumSystem::startPump(bool start){
+    digitalWrite(pumpPin_, start ? HIGH : LOW);
+    isPumpOn_ = start;
+    updateState();
+}
+
+void VacuumSystem::openValve(bool open){
+    digitalWrite(valvePin_, open ? HIGH : LOW);
+    isValveOpen_ = open;
+    updateState();
 }
 
 void VacuumSystem::suck() {
-    digitalWrite(pumpPin_, HIGH);
-    digitalWrite(valvePin_, LOW);
-    suckStartTime_ = millis();
-    isSucking_ = true;
-    isReleasing_ = false;
+    startPump(true);
+    openValve(false);
 }
 
 void VacuumSystem::release() {
-    digitalWrite(pumpPin_, LOW);
-    digitalWrite(valvePin_, HIGH);
-    releaseStartTime_ = millis();
-    isReleasing_ = true;
-    isSucking_ = false;
+    startPump(false);
+    openValve(true);
 }
 
 bool VacuumSystem::isReleased() {
@@ -54,5 +61,28 @@ int VacuumSystem::pressure() {
         return analogRead(vacuumSensorPin_);
     } else {
         return 0;
+    }
+}
+
+void VacuumSystem::updateState(){
+    if (isSucking_){
+        if (!isPumpOn_ || isValveOpen_){
+            isSucking_ = false;
+        }
+    }else{
+        if (isPumpOn_ && !isValveOpen_){
+            isSucking_ = true;
+            suckStartTime_ = millis();
+        }
+    }
+    if (isReleasing_){
+        if (isPumpOn_ || !isValveOpen_){
+            isReleasing_ = false;
+        }
+    }else{
+        if (!isPumpOn_ && isValveOpen_){
+            isReleasing_ = true;
+            releaseStartTime_ = millis();
+        }
     }
 }
