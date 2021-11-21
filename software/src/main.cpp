@@ -12,42 +12,37 @@ Hat hat(HAT_VAC_PUMP, HAT_VALVE, HAT_SERVO1, HAT_SERVO2);
 
 Communication communication(&Serial2);
 
-IOCommand cmd;
+protoduck::Message cmd;
+
+unsigned long lastSent = 0;
 
 void setup() {
+    Serial.begin(115200);
+    communication.init();
     arm.init();
     hat.init();
-    arm.setZPrimsaticSpeed(-10);
+    hat.extendTo(0);
+    arm.setZPrimsaticSpeed(5000);
+    arm.sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 308);
+    arm.sendPositionCommand(Arm::eJoint::REVOLUTE_Y, 0);
 }
 
 void loop() {
     arm.loop();
+    
     Communication::eMessageStatus msgStatus = communication.checkMessages(cmd);
     if (msgStatus == Communication::eMessageStatus::NEW_MSG) {
-        if (cmd.has_arm_position_command()) {
-            arm.sendPositionCommand(Arm::eJoint::PRISMATIC_Z, cmd.arm_position_command().z_prismatic_position());
-            arm.sendPositionCommand(Arm::eJoint::REVOLUTE_Z, cmd.arm_position_command().z_rotational_position());
-            arm.sendPositionCommand(Arm::eJoint::REVOLUTE_Y, cmd.arm_position_command().y_rotational_position());
-        } else if (cmd.has_arm_pump_command()) {
-            if (cmd.arm_pump_command().enable()) {
-                arm.grasp();
-            } else {
-                arm.drop();
-            }
-        } else if (cmd.has_hat_position_command()) {
-            hat.extendTo(cmd.hat_position_command().hat_height());
-        } else if (cmd.has_hat_pump_command()) {
-            if (cmd.hat_pump_command().enable()) {
-                hat.grasp();
-            } else {
-                hat.drop();
-            }
-        } else if (cmd.has_io_request()) {
-            if (cmd.io_request() == IORequest::ARM_STATUS) {
-                communication.sendArmStatus(arm.getPosition(Arm::PRISMATIC_Z), arm.getPosition(Arm::REVOLUTE_Z), arm.getPosition(Arm::REVOLUTE_Y),
-                                            arm.isPumpEnabled(), arm.isValveClosed(), arm.pressure());
-            } else if (cmd.io_request() == IORequest::HAT_STATUS) {
-                communication.sendHatStatus(hat.getHeight(), hat.isReleased(), hat.isReleased());  // TODO: Change message
+        if (cmd.msg_type() == protoduck::Message::MsgType::COMMAND) {
+            if (cmd.has_arm()) {
+                arm.sendPositionCommand(Arm::eJoint::PRISMATIC_Z, std::round(cmd.arm().traZ()));
+                arm.sendPositionCommand(Arm::eJoint::REVOLUTE_Z, std::round(cmd.arm().rotZ()));
+                arm.sendPositionCommand(Arm::eJoint::REVOLUTE_Y, std::round(cmd.arm().rotY()));
+                arm.startPump(cmd.arm().pump());
+                arm.openValve(cmd.arm().valve());
+            } else if (cmd.has_hat()) {
+                hat.extendTo(cmd.hat().height());
+                hat.startPump(cmd.hat().pump());
+                hat.openValve(cmd.hat().valve());
             }
         }
     }
