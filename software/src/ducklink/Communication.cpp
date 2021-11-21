@@ -1,34 +1,42 @@
 #include "ducklink/Communication.h"
 
-Communication::Communication(HardwareSerial* serial) : serial_(serial), receiveState_(Communication::eRcvState::START_1) { serial_->begin(57600); }
+Communication::Communication(HardwareSerial* serial) : receiveState_(Communication::eRcvState::START_1), serial_(serial) {}
 
-Communication::eMessageStatus Communication::checkMessages(IOCommand& msg) {
+void Communication::init() { serial_->begin(57600); }
+
+Communication::eMessageStatus Communication::checkMessages(protoduck::Message& msg) {
     msg.clear();
     uint8_t byte;
     size_t readLen;
     if (receiveState_ == Communication::eRcvState::START_1) {
         rcvBuffer_.clear();
         checksum_ = 0;
-        readLen = serial_->readBytes(&byte, 1);
-        if (readLen == 1 && byte == 0xFF) {
-            receiveState_ = Communication::eRcvState::START_2;
+        if (serial_->available()) {
+            readLen = serial_->readBytes(&byte, 1);
+            if (readLen == 1 && byte == 0xFF) {
+                receiveState_ = Communication::eRcvState::START_2;
+            }
         }
     }
     if (receiveState_ == Communication::eRcvState::START_2) {
-        readLen = serial_->readBytes(&byte, 1);
-        if (readLen == 1) {
-            if (byte == 0xFF) {
-                receiveState_ = Communication::eRcvState::LEN;
-            } else {
-                receiveState_ = Communication::eRcvState::START_1;
+        if (serial_->available()) {
+            readLen = serial_->readBytes(&byte, 1);
+            if (readLen == 1) {
+                if (byte == 0xFF) {
+                    receiveState_ = Communication::eRcvState::LEN;
+                } else {
+                    receiveState_ = Communication::eRcvState::START_1;
+                }
             }
         }
     }
     if (receiveState_ == Communication::eRcvState::LEN) {
-        readLen = serial_->readBytes(&byte, 1);
-        if (readLen == 1) {
-            nbBytesExpected_ = byte;
-            receiveState_ = Communication::eRcvState::PAYLOAD;
+        if (serial_->available()) {
+            readLen = serial_->readBytes(&byte, 1);
+            if (readLen == 1) {
+                nbBytesExpected_ = byte;
+                receiveState_ = Communication::eRcvState::PAYLOAD;
+            }
         }
     }
     if (receiveState_ == Communication::eRcvState::PAYLOAD) {
@@ -42,18 +50,20 @@ Communication::eMessageStatus Communication::checkMessages(IOCommand& msg) {
         }
     }
     if (receiveState_ == Communication::eRcvState::CHECKSUM) {
-        readLen = serial_->readBytes(&byte, 1);
-        if (readLen == 1) {
-            receiveState_ = Communication::eRcvState::START_1;
-            if (byte == checksum_) {
-                EmbeddedProto::Error err = msg.deserialize(rcvBuffer_);
-                if (err == EmbeddedProto::Error::NO_ERRORS) {
-                    return Communication::eMessageStatus::NEW_MSG;
+        if (serial_->available()) {
+            readLen = serial_->readBytes(&byte, 1);
+            if (readLen == 1) {
+                receiveState_ = Communication::eRcvState::START_1;
+                if (byte == checksum_) {
+                    EmbeddedProto::Error err = msg.deserialize(rcvBuffer_);
+                    if (err == EmbeddedProto::Error::NO_ERRORS) {
+                        return Communication::eMessageStatus::NEW_MSG;
+                    } else {
+                        return Communication::eMessageStatus::COM_ERROR;
+                    }
                 } else {
                     return Communication::eMessageStatus::COM_ERROR;
                 }
-            } else {
-                return Communication::eMessageStatus::COM_ERROR;
             }
         }
     }
@@ -62,27 +72,30 @@ Communication::eMessageStatus Communication::checkMessages(IOCommand& msg) {
 
 void Communication::sendArmStatus(unsigned int zPriPosition, unsigned int zRotPosition, unsigned int yRotPosition, bool pumpEnabled, bool valveClosed,
                                   unsigned int pressureValue) {
-    IOAnswer msg;
-    ArmStatus& armStatus = msg.mutable_arm_status();
-    armStatus.set_z_prismatic_position(zPriPosition);
-    armStatus.set_z_rotational_position(zRotPosition);
-    armStatus.set_y_rotational_position(yRotPosition);
-    armStatus.set_pumpEnabled(pumpEnabled);
-    armStatus.set_valveClosed(valveClosed);
-    armStatus.set_pressureValue(pressureValue);
+    protoduck::Message msg;
+    protoduck::Arm& armStatus = msg.mutable_arm();
+    armStatus.set_traZ(zPriPosition);
+    armStatus.set_rotZ(zRotPosition);
+    armStatus.set_rotY(yRotPosition);
+    armStatus.set_pump(pumpEnabled);
+    armStatus.set_valve(valveClosed);
+    armStatus.set_pressure(pressureValue);
     send(msg);
 }
 
 void Communication::sendHatStatus(unsigned int hatHeight, bool pumpEnabled, bool valveClosed) {
-    IOAnswer msg;
-    HatStatus& hatStatus = msg.mutable_hat_status();
-    hatStatus.set_hat_height(hatHeight);
-    hatStatus.set_pumpEnabled(pumpEnabled);
-    hatStatus.set_valveClosed(valveClosed);
+    protoduck::Message msg;
+    protoduck::Hat& hatStatus = msg.mutable_hat();
+    hatStatus.set_height(hatHeight);
+    hatStatus.set_pump(pumpEnabled);
+    hatStatus.set_valve(valveClosed);
+    hatStatus.set_pressure(0.);
     send(msg);
 }
 
-void Communication::send(const IOAnswer& msg) {
+void Communication::send(protoduck::Message msg) {
+    msg.set_source(protoduck::Message::Agent::DIFF);
+    msg.set_msg_type(protoduck::Message::MsgType::STATUS);
     BytesWriteBuffer sendBuffer;
     sendBuffer.clear();
     msg.serialize(sendBuffer);
