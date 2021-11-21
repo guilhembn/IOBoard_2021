@@ -22,7 +22,7 @@
 #define UART_TX PA2
 #define UART_RX PA3
 
-#define DYNAMIXELS_HALF_DUP_SERIAL Serial
+#define DYNAMIXELS_HALF_DUP_SERIAL Serial1
 
 
 #endif /* PINLAYOUT_H */

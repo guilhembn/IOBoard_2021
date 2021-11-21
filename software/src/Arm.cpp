@@ -51,6 +51,8 @@ void Arm::setZPrimsaticSpeed(int speed) {
 }
 
 void Arm::sendPositionCommand(eJoint joint, int command) {
+    // Dyn 1: neutral 512; extended : 820; pick : 412
+    // Dyn 2: neutral 544; down: 320; up: 750
     switch (joint) {
         case eJoint::PRISMATIC_Z:
             isStepperInSpeedMode_ = false;
@@ -81,6 +83,7 @@ int Arm::getPosition(eJoint joint) {
         default:
             break;
     }
+    return 0.;
 }
 
 void Arm::grasp() { vacuumSystem_.suck(); }
