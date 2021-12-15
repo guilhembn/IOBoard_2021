@@ -119,10 +119,10 @@ void Arm::sendPositionCommand(eJoint joint, float command) {
             }
             break;
         case eJoint::REVOLUTE_Z:
-            dynamixel_.move(zAxisRotDynamixelId_, command + DYNAMIXEL_TO_0_1);
+            dynamixel_.moveSpeed(zAxisRotDynamixelId_, command + DYNAMIXEL_TO_0_1, 300);
             break;
         case eJoint::REVOLUTE_Y:
-            dynamixel_.move(yAxisRotDynamixelId_, command + DYNAMIXEL_TO_0_2);
+            dynamixel_.moveSpeed(yAxisRotDynamixelId_, command + DYNAMIXEL_TO_0_2, 300);
             break;
         default:
             break;
