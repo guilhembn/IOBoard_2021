@@ -1,5 +1,6 @@
 #include "ducklink/Communication.h"
 
+Communication communication(&Serial2);
 
 Communication::Communication(HardwareSerial* serial) : receiveState_(Communication::eRcvState::START_1), serial_(serial) {}
 
@@ -98,6 +99,13 @@ void Communication::sendHatStatus(Hat& hat) {
     hatStatus.set_pump(hat.isPumpStarted());
     hatStatus.set_valve(hat.isValveOpen());
     hatStatus.set_pressure(0.);
+    send(msg);
+}
+
+void Communication::sendProcedureStatus(protoduck::ProcedureStatus::Status status) {
+    protoduck::Message msg;
+    auto& procedureStatus = msg.mutable_procedure_status();
+    procedureStatus.set_status(status);
     send(msg);
 }
 

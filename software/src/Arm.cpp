@@ -1,6 +1,11 @@
 #include "Arm.h"
 #include "TeensyStep.h"
 #include <Arduino.h>
+#include "PinLayout.h"
+
+Arm arm(ARM_VAC_PUMP, ARM_VALVE, ARM_VAC_SENSOR, &DYNAMIXELS_HALF_DUP_SERIAL, ARM_Z_DRIVER_STEP, ARM_Z_DRIVER_DIR, ARM_Z_DRIVER_ENABLE,
+        ARM_Z_LIMIT_SWITCH, ARM_Z_ROT_DYNAMIXEL_ID, ARM_Y_ROT_DYNAMIXEL_ID);
+
 
 StepControl controller; 
 

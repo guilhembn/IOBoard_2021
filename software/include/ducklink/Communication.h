@@ -23,6 +23,7 @@ class Communication {
 
     void sendArmStatus(Arm& arm);
     void sendHatStatus(Hat& hat);
+    void sendProcedureStatus(protoduck::ProcedureStatus::Status status);
 
    protected:
     void send(::protoduck::Message msg);
@@ -34,5 +35,7 @@ class Communication {
     BytesReadBuffer rcvBuffer_;
     HardwareSerial* serial_;
 };
+
+extern Communication communication;
 
 #endif /* COMMUNICATION_H */
