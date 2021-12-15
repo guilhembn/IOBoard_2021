@@ -28,6 +28,7 @@ void setup() {
 void loop() {
 
     arm.loop();
+    hat.loop();
 
     Communication::eMessageStatus msgStatus = communication.checkMessages(cmd);
     if (msgStatus == Communication::eMessageStatus::NEW_MSG) {

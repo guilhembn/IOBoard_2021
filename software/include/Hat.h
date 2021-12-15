@@ -6,13 +6,19 @@
 
 #define LEVER_LENGTH 30  // In mm
 
+constexpr float EPSILON = 0.01;
+constexpr float HEIGHT_SPEED = 10.0;
+constexpr uint32_t HAT_PERIOD = 15;
+
 class Hat{
 public:
 Hat(unsigned int pumpPin, unsigned int valvePin, unsigned int servoPin1, unsigned int servoPin2);
 
 void init();
 
-void extendTo(const int height);  // Extend the hat to a length of 'height', from the top of the hat (0, is fully up). In mm
+void loop();
+
+void extendTo(const float height);  // Extend the hat to a length of 'height', from the top of the hat (0, is fully up). In mm
 int getHeight();
 
 void grasp();
@@ -32,6 +38,8 @@ unsigned int servo1Pin_;
 unsigned int servo2Pin_;
 Servo servo1_;
 Servo servo2_;
+float height;
+float height_setpoint;
 
 
 };
