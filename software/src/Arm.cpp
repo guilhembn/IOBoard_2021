@@ -15,7 +15,8 @@ Arm::Arm(unsigned int pumpPin, unsigned int valvePin, unsigned int pressureSenso
       zAxisEnablePin(zAxisEnablePin),
       zAxisLimitSwitchPin_(zAxisLimitSwitchPin),
       isStepperInSpeedMode_(false),
-      zStopHit(false)
+      zStopHit(false),
+      time_z_cmd(0)
 {
 
 }
@@ -41,9 +42,12 @@ void Arm::init() {
     };
     attachInterrupt(zAxisLimitSwitchPin_, zstop_hit_isr, FALLING);
     homeZ();
+    time_z_cmd = millis();
 }
 
 void Arm::homeZ() {
+    sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 308);
+    sendPositionCommand(Arm::eJoint::REVOLUTE_Y, 0);
     zAxisStepper_.setMaxSpeed(STEPPER_HOME_SPEED);     // slow
     zAxisStepper_.setPosition(-10000);
     zAxisStepper_.setTargetAbs(0);
@@ -67,13 +71,17 @@ void Arm::loop() {
         homeZ();
         zStopHit = false;
     }
+
+    if(millis() - time_z_cmd > TIME_STEPPER_DISABLE) {
+        enableZMotor(false);
+    }
 }
 
 void Arm::enableZMotor(bool enable) {
     if (enable) {
-        digitalWrite(LOW, zAxisEnablePin);
+        digitalWrite(zAxisEnablePin, LOW);
     } else {
-        digitalWrite(HIGH, zAxisEnablePin);
+        digitalWrite(zAxisEnablePin, HIGH);
     }
 }
 
@@ -94,10 +102,15 @@ void Arm::sendPositionCommand(eJoint joint, float command) {
     switch (joint) {
         case eJoint::PRISMATIC_Z:
             {
+                if(!isZMotorEnabled()) {
+                    enableZMotor(true);
+                    homeZ();
+                }
                 isStepperInSpeedMode_ = false;
                 int target = command * STEP_PER_MM;
                 zAxisStepper_.setTargetAbs(target);
                 controller.moveAsync(zAxisStepper_);
+                time_z_cmd = millis();
             }
             break;
         case eJoint::REVOLUTE_Z:

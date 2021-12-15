@@ -14,6 +14,8 @@
 
 #define STEP_PER_MM 41.18
 
+#define TIME_STEPPER_DISABLE 30000  // stepper automatically disable after 30s
+
 
 class Arm{
 public:
@@ -37,6 +39,7 @@ void startPump(bool start){vacuumSystem_.startPump(start);}
 void openValve(bool open){vacuumSystem_.openValve(open);}
 bool isPumpStarted() {return vacuumSystem_.isPumpOn();}
 bool isValveOpen() {return vacuumSystem_.isValveOpen();}
+bool isZMotorEnabled() {return !digitalRead(zAxisEnablePin);}
 
 enum eJoint{
     PRISMATIC_Z = 0,
@@ -65,6 +68,7 @@ unsigned int zAxisLimitSwitchPin_;
 bool isStepperInSpeedMode_;
 
 volatile bool zStopHit;
+uint32_t time_z_cmd;
 
 };
 
