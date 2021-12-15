@@ -1,8 +1,9 @@
 #include "ducklink/Communication.h"
 
+
 Communication::Communication(HardwareSerial* serial) : receiveState_(Communication::eRcvState::START_1), serial_(serial) {}
 
-void Communication::init() { serial_->begin(57600); }
+void Communication::init(int baudrate) { serial_->begin(baudrate); }
 
 Communication::eMessageStatus Communication::checkMessages(protoduck::Message& msg) {
     msg.clear();
@@ -70,10 +71,17 @@ Communication::eMessageStatus Communication::checkMessages(protoduck::Message& m
     return Communication::eMessageStatus::NO_MSG;
 }
 
-void Communication::sendArmStatus(unsigned int zPriPosition, unsigned int zRotPosition, unsigned int yRotPosition, bool pumpEnabled, bool valveClosed,
-                                  unsigned int pressureValue) {
+void Communication::sendArmStatus(Arm& arm) {
     protoduck::Message msg;
     protoduck::Arm& armStatus = msg.mutable_arm();
+
+    float zPriPosition = arm.getPosition(Arm::eJoint::PRISMATIC_Z);
+    float zRotPosition = arm.getPosition(Arm::eJoint::REVOLUTE_Z);
+    float yRotPosition = arm.getPosition(Arm::eJoint::REVOLUTE_Y);
+    bool pumpEnabled = arm.isPumpStarted();
+    bool valveClosed = arm.isValveOpen();
+    unsigned int pressureValue = arm.pressure();
+
     armStatus.set_traZ(zPriPosition);
     armStatus.set_rotZ(zRotPosition);
     armStatus.set_rotY(yRotPosition);
@@ -83,12 +91,12 @@ void Communication::sendArmStatus(unsigned int zPriPosition, unsigned int zRotPo
     send(msg);
 }
 
-void Communication::sendHatStatus(unsigned int hatHeight, bool pumpEnabled, bool valveClosed) {
+void Communication::sendHatStatus(Hat& hat) {
     protoduck::Message msg;
     protoduck::Hat& hatStatus = msg.mutable_hat();
-    hatStatus.set_height(hatHeight);
-    hatStatus.set_pump(pumpEnabled);
-    hatStatus.set_valve(valveClosed);
+    hatStatus.set_height(hat.getHeight());
+    hatStatus.set_pump(hat.isPumpStarted());
+    hatStatus.set_valve(hat.isValveOpen());
     hatStatus.set_pressure(0.);
     send(msg);
 }

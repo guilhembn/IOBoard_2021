@@ -8,6 +8,7 @@ void Hat::init() {
     vacuumSystem_.init();
     servo1_.attach(servo1Pin_);
     servo2_.attach(servo2Pin_);
+    extendTo(0);
 }
 
 void Hat::extendTo(const int height) {

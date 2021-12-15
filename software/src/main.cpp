@@ -5,6 +5,9 @@
 #include "PinLayout.h"
 #include "ducklink/Communication.h"
 
+
+uint32_t status_time = 0;
+
 Arm arm(ARM_VAC_PUMP, ARM_VALVE, ARM_VAC_SENSOR, &DYNAMIXELS_HALF_DUP_SERIAL, ARM_Z_DRIVER_STEP, ARM_Z_DRIVER_DIR, ARM_Z_DRIVER_ENABLE,
         ARM_Z_LIMIT_SWITCH, ARM_Z_ROT_DYNAMIXEL_ID, ARM_Y_ROT_DYNAMIXEL_ID);
 
@@ -17,19 +20,15 @@ protoduck::Message cmd;
 unsigned long lastSent = 0;
 
 void setup() {
-    Serial.begin(115200);
-    communication.init();
-    arm.init();
+    communication.init(115200);
     hat.init();
-    hat.extendTo(0);
-    arm.setZPrimsaticSpeed(5000);
-    arm.sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 308);
-    arm.sendPositionCommand(Arm::eJoint::REVOLUTE_Y, 0);
+    arm.init();
 }
 
 void loop() {
+
     arm.loop();
-    
+
     Communication::eMessageStatus msgStatus = communication.checkMessages(cmd);
     if (msgStatus == Communication::eMessageStatus::NEW_MSG) {
         if (cmd.msg_type() == protoduck::Message::MsgType::COMMAND) {
@@ -46,4 +45,12 @@ void loop() {
             }
         }
     }
+
+    if(millis() - status_time > 200) {
+        communication.sendHatStatus(hat);
+        communication.sendArmStatus(arm);
+        status_time = millis();
+    }
+    
+    
 }

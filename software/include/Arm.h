@@ -3,14 +3,16 @@
 
 #include "Dynamixel/DynamixelSerial.h"
 #include "VacuumSystem.h"
-#include "AccelStepper.h"
+#include "TeensyStep.h"
 
 #define DYNAMIXEL_TO_0_1 512
 #define DYNAMIXEL_TO_0_2 512
 
-#define STEPPER_HOME_SPEED 10
-#define STEPPER_MAX_ACC 10
-#define STEPPER_MAX_SPEED 500
+#define STEPPER_HOME_SPEED 1000
+#define STEPPER_MAX_ACC 5000
+#define STEPPER_MAX_SPEED 2000
+
+#define STEP_PER_MM 41.18
 
 
 class Arm{
@@ -21,6 +23,8 @@ Arm(unsigned int pumpPin, unsigned int valvePin, unsigned int pressureSensorPin,
 
 void init();
 void loop();
+
+void homeZ();
 
 bool isMoving();
 
@@ -40,11 +44,11 @@ enum eJoint{
     REVOLUTE_Y = 2
 };
 
-void sendPositionCommand(const eJoint joint, const int command);
-int getPosition(const eJoint joint);
+void sendPositionCommand(const eJoint joint, const float command);
+float getPosition(const eJoint joint);
 int pressure() {return vacuumSystem_.pressure();}
 
-void setZPrimsaticSpeed(int speed);
+// void setZPrimsaticSpeed(int speed);
 void resetZPrimaticPosition();
 
 protected:
@@ -55,9 +59,12 @@ unsigned int yAxisRotDynamixelId_;
 
 VacuumSystem vacuumSystem_;
 
-AccelStepper zAxisStepper_;
+Stepper zAxisStepper_;
+int zAxisEnablePin;
 unsigned int zAxisLimitSwitchPin_;
 bool isStepperInSpeedMode_;
+
+volatile bool zStopHit;
 
 };
 
