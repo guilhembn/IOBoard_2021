@@ -1,8 +1,8 @@
 #include "ProcedureManager.h"
 
-class ProcStack: public AbstractProcedure {
+class ProcTurnStack: public AbstractProcedure {
 public:
-    ProcStack(): AbstractProcedure() {}
+    ProcTurnStack(): AbstractProcedure() {}
     ProcedureState loop();
     void setParam(int32_t p);
     void reset();
@@ -12,12 +12,18 @@ private:
         INIT,
         DOWN,
         UP,
+        TURN_UP,
         TURN,
+        UP_HAT,
+        CLEAR_HAT,
+        TURN_BACK,
+        LOWER,
         DROP,
+        HAT_UP,
     };
 
     State current_state;
     int32_t drop_height;
 };
 
-extern ProcStack proc_stack;
+extern ProcTurnStack proc_turn_stack;

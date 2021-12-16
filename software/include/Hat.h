@@ -40,8 +40,8 @@ Servo servo1_;
 Servo servo2_;
 float height;
 float height_setpoint;
-
-
 };
+
+extern Hat hat;
 
 #endif /* HAT_H */

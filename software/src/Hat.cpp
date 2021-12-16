@@ -1,6 +1,9 @@
 #include <Hat.h>
 #include <math.h>
 #include <Arduino.h>
+#include "PinLayout.h"
+
+Hat hat(HAT_VAC_PUMP, HAT_VALVE, HAT_SERVO1, HAT_SERVO2);
 
 int clamp(float val, float lo, float hi) {
     if(val > hi) {return hi;}

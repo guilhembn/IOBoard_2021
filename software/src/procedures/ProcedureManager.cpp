@@ -1,5 +1,6 @@
 #include "ProcedureManager.h"
 #include "procedure_stack.h"
+#include "procedure_turn_stack.h"
 #include "ducklink/Communication.h"
 
 ProcedureManager procedure_manager;
@@ -15,7 +16,7 @@ void ProcedureManager::init() {
 
     procedures[(int)protoduck::Procedure::Proc::HOME] = nullptr;
     procedures[(int)protoduck::Procedure::Proc::PUT_ON_STACK] = &proc_stack;
-    procedures[(int)protoduck::Procedure::Proc::TURN_AND_PUT_ON_STACK] = nullptr;
+    procedures[(int)protoduck::Procedure::Proc::TURN_AND_PUT_ON_STACK] = &proc_turn_stack;
     procedures[(int)protoduck::Procedure::Proc::TAKE_FROM_STACK] = nullptr;
 }
 

@@ -8,8 +8,6 @@
 
 uint32_t status_time = 0;
 
-Hat hat(HAT_VAC_PUMP, HAT_VALVE, HAT_SERVO1, HAT_SERVO2);
-
 protoduck::Message cmd;
 
 unsigned long lastSent = 0;
