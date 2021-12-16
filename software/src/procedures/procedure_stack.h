@@ -2,10 +2,10 @@
 
 class ProcStack: public AbstractProcedure {
 public:
+    ProcStack(): AbstractProcedure() {}
     ProcedureState loop();
     void setParam(int32_t p);
     void reset();
-    protoduck::ProcedureStatus::Status getStatus();
 
 private:
     enum State {

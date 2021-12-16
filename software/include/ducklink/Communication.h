@@ -7,8 +7,10 @@
 
 #include "ducklink/BytesReadBuffer.h"
 #include "ducklink/BytesWriteBuffer.h"
-#include "Arm.h"
-#include "Hat.h"
+
+class Arm;
+class Hat;
+class ProcedureManager;
 
 #define NUM_MESSAGES 10
 
@@ -23,7 +25,7 @@ class Communication {
 
     void sendArmStatus(Arm& arm);
     void sendHatStatus(Hat& hat);
-    void sendProcedureStatus(protoduck::ProcedureStatus::Status status);
+    void sendProcedureStatus(ProcedureManager& pm);
 
    protected:
     void send(::protoduck::Message msg);

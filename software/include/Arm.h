@@ -1,5 +1,4 @@
-#ifndef ARM_H
-#define ARM_H
+#pragma once
 
 #include "Dynamixel/DynamixelSerial.h"
 #include "VacuumSystem.h"
@@ -73,5 +72,3 @@ uint32_t time_z_cmd;
 };
 
 extern Arm arm;
-
-#endif /* ARM_H */

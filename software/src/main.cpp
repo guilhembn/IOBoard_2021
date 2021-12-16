@@ -6,21 +6,16 @@
 #include "ducklink/Communication.h"
 #include "procedures/ProcedureManager.h"
 
-
 uint32_t status_time = 0;
 
-// Arm arm(ARM_VAC_PUMP, ARM_VALVE, ARM_VAC_SENSOR, &DYNAMIXELS_HALF_DUP_SERIAL, ARM_Z_DRIVER_STEP, ARM_Z_DRIVER_DIR, ARM_Z_DRIVER_ENABLE,
-//         ARM_Z_LIMIT_SWITCH, ARM_Z_ROT_DYNAMIXEL_ID, ARM_Y_ROT_DYNAMIXEL_ID);
-
 Hat hat(HAT_VAC_PUMP, HAT_VALVE, HAT_SERVO1, HAT_SERVO2);
-
-//Communication communication(&Serial2);
 
 protoduck::Message cmd;
 
 unsigned long lastSent = 0;
 
 void setup() {
+    pinMode(LED_BUILTIN, OUTPUT);
     communication.init(115200);
     hat.init();
     arm.init();
@@ -46,10 +41,10 @@ void loop() {
                 hat.extendTo(cmd.hat().height());
                 hat.startPump(cmd.hat().pump());
                 hat.openValve(cmd.hat().valve());
-            } else if(cmd.has_procedure_cmd()) {
-                auto procedure = cmd.procedure_cmd().get_procedure();
-                auto param = cmd.procedure_cmd().get_param();
-                auto arm_id = cmd.procedure_cmd().get_arm_id();
+            } else if(cmd.has_procedure()) {
+                protoduck::Procedure::Proc procedure = cmd.procedure().get_proc();
+                auto param = cmd.procedure().get_param();
+                auto arm_id = cmd.procedure().get_arm_id();
                 procedure_manager.setProcedure(procedure, arm_id, param);
             }
         }
@@ -58,8 +53,7 @@ void loop() {
     if(millis() - status_time > 200) {
         communication.sendHatStatus(hat);
         communication.sendArmStatus(arm);
+        communication.sendProcedureStatus(procedure_manager);
         status_time = millis();
-    }
-    
-    
+    }    
 }

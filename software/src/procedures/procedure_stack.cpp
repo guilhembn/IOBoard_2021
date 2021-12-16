@@ -3,7 +3,6 @@
 
 ProcStack proc_stack;
 
-
 ProcedureState ProcStack::loop() {
     if(current_state == State::INIT) {
         arm.sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 306);
@@ -49,6 +48,7 @@ ProcedureState ProcStack::loop() {
     if(current_state == State::DROP)  {
         if(arm.pressure() < 130) {
             arm.openValve(false);
+            status = protoduck::Procedure::Status::SUCCESS;
             return ProcedureState::IDLE;
         }
     }
@@ -63,8 +63,5 @@ void ProcStack::setParam(int32_t p) {
 
 void ProcStack::reset() {
     current_state = State::INIT;
+    status = protoduck::Procedure::Status::RUNNING;
 }
-
-protoduck::ProcedureStatus::Status ProcStack::getStatus() {
-    return protoduck::ProcedureStatus::Status::RUNNING;
-};

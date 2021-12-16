@@ -1,4 +1,7 @@
 #include "ducklink/Communication.h"
+#include "procedures/ProcedureManager.h"
+#include "Arm.h"
+#include "Hat.h"
 
 Communication communication(&Serial2);
 
@@ -102,10 +105,16 @@ void Communication::sendHatStatus(Hat& hat) {
     send(msg);
 }
 
-void Communication::sendProcedureStatus(protoduck::ProcedureStatus::Status status) {
+void Communication::sendProcedureStatus(ProcedureManager& pm) {
     protoduck::Message msg;
-    auto& procedureStatus = msg.mutable_procedure_status();
-    procedureStatus.set_status(status);
+    msg.set_msg_type(protoduck::Message::MsgType::STATUS);
+    auto& procedure = msg.mutable_procedure();
+    procedure.set_status(pm.getStatus());
+    auto p = pm.getParams();
+    procedure.set_arm_id(p.arm_id);
+    procedure.set_param(p.param);
+    procedure.set_proc(p.proc);
+    
     send(msg);
 }
 
