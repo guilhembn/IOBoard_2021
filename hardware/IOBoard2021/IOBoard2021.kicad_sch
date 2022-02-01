@@ -4,6 +4,14 @@
 
   (paper "A3")
 
+  (title_block
+    (title "IO board 2022")
+    (date "2022-02-01")
+    (rev "R1")
+    (company "The Rusty Ducks")
+    (comment 1 "Fabien")
+  )
+
   (lib_symbols
     (symbol "Connector:Conn_01x02_Male" (pin_names (offset 1.016) hide) (in_bom yes) (on_board yes)
       (property "Reference" "J" (id 0) (at 0 2.54 0)
