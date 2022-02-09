@@ -5,3 +5,6 @@
 	path = software/protoduck
 	url = git@github.com:rustyducks/protoduck.git
 
+[submodule "hardware/IOBoard2021/kicad_libs_FBO"]
+	path = hardware/IOBoard2021/kicad_libs_FBO
+	url = git@github.com:Fabien-B/kicad_libs_FBO.git
