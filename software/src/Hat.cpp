@@ -2,8 +2,10 @@
 #include <math.h>
 #include <Arduino.h>
 #include "PinLayout.h"
+#include "Gpios.h"
+#include "Pressure.h"
 
-Hat hat(HAT_VAC_PUMP, HAT_VALVE, HAT_SERVO1, HAT_SERVO2);
+Hat hat(Gpios::HAT_VAC_PUMP, Gpios::HAT_VALVE, Pressure::HAT, HAT_SERVO1, HAT_SERVO2);
 
 int clamp(float val, float lo, float hi) {
     if(val > hi) {return hi;}
@@ -11,8 +13,8 @@ int clamp(float val, float lo, float hi) {
     return val;
 }
 
-Hat::Hat(unsigned int pumpPin, unsigned int valvePin, unsigned int servoPin1, unsigned int servoPin2) :
-    vacuumSystem_(pumpPin, valvePin, 500, 200),
+Hat::Hat(Gpios::Signal pumpPin, Gpios::Signal valvePin, Pressure::Sensor pressureSensor, unsigned int servoPin1, unsigned int servoPin2) :
+    vacuumSystem_(pumpPin, valvePin, pressureSensor),
     servo1Pin_(servoPin1), servo2Pin_(servoPin2),
     height(0), height_setpoint(0)
 {}

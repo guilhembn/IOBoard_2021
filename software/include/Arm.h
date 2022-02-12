@@ -18,9 +18,9 @@
 
 class Arm{
 public:
-Arm(unsigned int pumpPin, unsigned int valvePin, unsigned int pressureSensorPin, HardwareSerial* dynamixelSerial, 
+Arm(Gpios::Signal pumpPin, Gpios::Signal valvePin, Pressure::Sensor pressureSensor, HardwareSerial* dynamixelSerial, 
     unsigned int zAxisStepPin, unsigned int zAxisDirPin,
-    unsigned int zAxisEnablePin, unsigned int zAxisLimitSwitchPin, unsigned int zRotDynamixelId, unsigned int yRotDynamixelId);
+    Gpios::Signal zAxisEnablePin, Gpios::Signal zAxisLimitSwitchPin, unsigned int zRotDynamixelId, unsigned int yRotDynamixelId);
 
 void init();
 void loop();
@@ -48,7 +48,7 @@ enum eJoint{
 
 void sendPositionCommand(const eJoint joint, const float command);
 float getPosition(const eJoint joint);
-int pressure() {return vacuumSystem_.pressure();}
+int pressure() {return vacuumSystem_.getPressure();}
 
 // void setZPrimsaticSpeed(int speed);
 void resetZPrimaticPosition();
@@ -62,11 +62,10 @@ unsigned int yAxisRotDynamixelId_;
 VacuumSystem vacuumSystem_;
 
 Stepper zAxisStepper_;
-int zAxisEnablePin;
-unsigned int zAxisLimitSwitchPin_;
+Gpios::Signal zAxisEnablePin;
+Gpios::Signal zAxisLimitSwitchPin_;
 bool isStepperInSpeedMode_;
 
-volatile bool zStopHit;
 uint32_t time_z_cmd;
 
 };

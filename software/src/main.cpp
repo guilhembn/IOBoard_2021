@@ -5,6 +5,7 @@
 #include "PinLayout.h"
 #include "ducklink/Communication.h"
 #include "procedures/ProcedureManager.h"
+#include "Gpios.h"
 
 uint32_t status_time = 0;
 
@@ -13,11 +14,18 @@ protoduck::Message cmd;
 unsigned long lastSent = 0;
 
 void setup() {
-    pinMode(LED_BUILTIN, OUTPUT);
+    gpios.init();
+    gpios.setMode(Gpios::LED, OUTPUT);
     communication.init(115200);
     hat.init();
     arm.init();
     procedure_manager.init();
+
+    for(int i=0; i<5; i++) {
+        gpios.toggle(Gpios::LED);
+        delay(200);
+    }
+    
 }
 
 void loop() {
@@ -53,5 +61,6 @@ void loop() {
         communication.sendArmStatus(arm);
         communication.sendProcedureStatus(procedure_manager);
         status_time = millis();
+        gpios.toggle(Gpios::LED);
     }    
 }

@@ -8,8 +8,8 @@ namespace TeensyStep
 
     class Stepper
     {
-        static inline constexpr int32_t vMaxMax = 300000;   // largest speed possible (steps/s)
-        static inline constexpr uint32_t aMax = 500000;     // speed up to 500kHz within 1 s (steps/s^2)
+        static constexpr int32_t vMaxMax = 300000;   // largest speed possible (steps/s)
+        static constexpr uint32_t aMax = 500000;     // speed up to 500kHz within 1 s (steps/s^2)
         static constexpr uint32_t vMaxDefault = 800; // should work with every motor (1 rev/sec in 1/4-step mode)
         static constexpr uint32_t vPullInOutDefault = 100;
         static constexpr uint32_t aDefault = 2500; // reasonably low (~0.5s for reaching the default speed)

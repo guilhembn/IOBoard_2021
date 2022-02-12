@@ -3,8 +3,8 @@
 
 namespace TeensyStep
 {
-    //constexpr int32_t Stepper::vMaxMax = 300000;
-    //constexpr uint32_t Stepper::aMax = 500000;
+    constexpr int32_t Stepper::vMaxMax;// = 300000;
+    constexpr uint32_t Stepper::aMax;// = 500000;
 
     Stepper::Stepper(const int _stepPin, const int _dirPin)
         : current(0), stepPin(_stepPin), dirPin(_dirPin)

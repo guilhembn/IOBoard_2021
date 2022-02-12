@@ -12,7 +12,7 @@ constexpr uint32_t HAT_PERIOD = 15;
 
 class Hat{
 public:
-Hat(unsigned int pumpPin, unsigned int valvePin, unsigned int servoPin1, unsigned int servoPin2);
+Hat(Gpios::Signal pumpPin, Gpios::Signal valvePin, Pressure::Sensor pressureSensor, unsigned int servoPin1, unsigned int servoPin2);
 
 void init();
 

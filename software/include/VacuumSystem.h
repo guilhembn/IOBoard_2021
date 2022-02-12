@@ -2,15 +2,16 @@
 #define VACUUMSYSTEM_H
 
 #include <stdint.h>
+#include "Gpios.h"
+#include "Pressure.h"
 
 #define PRESSURE_SENSOR_VACUUMED_VALUE 100
 #define PRESSURE_SENSOR_ATMO_VALUE 800
 
 class VacuumSystem{
     public:
-    VacuumSystem(unsigned int pumpPin, unsigned int valvePin, unsigned int vacuumSensorPin);
-    VacuumSystem(unsigned int pumpPin, unsigned int valvePin, unsigned int vacuumDuration, unsigned int releaseDuration);
-
+    VacuumSystem(Gpios::Signal pumpPin, Gpios::Signal valvePin, Pressure::Sensor vacuumSensorPin);
+  
     void init();
 
     bool isVacuumed();
@@ -21,16 +22,14 @@ class VacuumSystem{
     void openValve(bool open = true);
     bool isPumpOn() { return isPumpOn_;}
     bool isValveOpen() {return isValveOpen_;}
-    int pressure();
+    int getPressure();
 
     protected:
     void updateState();
 
-    unsigned int pumpPin_;
-    unsigned int valvePin_;
-    int vacuumSensorPin_;
-    unsigned int vacuumDuration_;
-    unsigned int releaseDuration_;
+    Gpios::Signal pumpPin_;
+    Gpios::Signal valvePin_;
+    Pressure::Sensor vacuumSensor;
     uint32_t releaseStartTime_;
     uint32_t suckStartTime_;
     bool isSucking_;

@@ -4,18 +4,14 @@
 #include <variant_NUCLEO_L432KC.h>
 #include <HardwareSerial.h>
 
-#define ARM_VAC_PUMP PA12
-#define ARM_VAC_SENSOR PA4
-#define ARM_VALVE PA10
-#define ARM_Z_DRIVER_STEP PA1
-#define ARM_Z_DRIVER_DIR PA0
-#define ARM_Z_DRIVER_ENABLE PA6
-#define ARM_Z_LIMIT_SWITCH PA7
+constexpr uint32_t ARM1_Z_DRIVER_STEP = PA1;
+constexpr uint32_t ARM1_Z_DRIVER_DIR = PB0;
+constexpr uint32_t ARM2_Z_DRIVER_STEP = PA0;
+constexpr uint32_t ARM2_Z_DRIVER_DIR = PB1;
+
 #define ARM_Z_ROT_DYNAMIXEL_ID 1
 #define ARM_Y_ROT_DYNAMIXEL_ID 2
 
-#define HAT_VAC_PUMP PA5
-#define HAT_VALVE PB5
 #define HAT_SERVO1 PA8
 #define HAT_SERVO2 PA11
 
@@ -23,6 +19,8 @@
 #define UART_RX PA3
 
 #define DYNAMIXELS_HALF_DUP_SERIAL Serial1
+
+#define R_MEAS_PIN PA4
 
 
 #endif /* PINLAYOUT_H */

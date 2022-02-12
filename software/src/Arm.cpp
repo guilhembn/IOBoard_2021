@@ -2,25 +2,26 @@
 #include "TeensyStep.h"
 #include <Arduino.h>
 #include "PinLayout.h"
+#include "Gpios.h"
 
-Arm arm(ARM_VAC_PUMP, ARM_VALVE, ARM_VAC_SENSOR, &DYNAMIXELS_HALF_DUP_SERIAL, ARM_Z_DRIVER_STEP, ARM_Z_DRIVER_DIR, ARM_Z_DRIVER_ENABLE,
-        ARM_Z_LIMIT_SWITCH, ARM_Z_ROT_DYNAMIXEL_ID, ARM_Y_ROT_DYNAMIXEL_ID);
+Arm arm(Gpios::ARM1_VAC_PUMP, Gpios::ARM1_VALVE, Pressure::ARM1, &DYNAMIXELS_HALF_DUP_SERIAL,
+    ARM1_Z_DRIVER_STEP, ARM1_Z_DRIVER_DIR, Gpios::ARM1_Z_DRIVER_ENABLE,
+    Gpios::ARM1_Z_LIMIT_SWITCH, ARM_Z_ROT_DYNAMIXEL_ID, ARM_Y_ROT_DYNAMIXEL_ID);
 
 
 StepControl controller; 
 
-Arm::Arm(unsigned int pumpPin, unsigned int valvePin, unsigned int pressureSensorPin, HardwareSerial* dynamixelSerial, unsigned int zAxisStepPin,
-         unsigned int zAxisDirPin, unsigned int zAxisEnablePin, unsigned int zAxisLimitSwitchPin, unsigned int zRotDynamixelId,
+Arm::Arm(Gpios::Signal pumpPin, Gpios::Signal valvePin, Pressure::Sensor pressureSensor, HardwareSerial* dynamixelSerial, unsigned int zAxisStepPin,
+         unsigned int zAxisDirPin, Gpios::Signal zAxisEnablePin, Gpios::Signal zAxisLimitSwitchPin, unsigned int zRotDynamixelId,
          unsigned int yRotDynamixelId)
     : dynamixelSerial_(dynamixelSerial),
       zAxisRotDynamixelId_(zRotDynamixelId),
       yAxisRotDynamixelId_(yRotDynamixelId),
-      vacuumSystem_(pumpPin, valvePin, pressureSensorPin),
+      vacuumSystem_(pumpPin, valvePin, pressureSensor),
       zAxisStepper_(zAxisStepPin, zAxisDirPin),
       zAxisEnablePin(zAxisEnablePin),
       zAxisLimitSwitchPin_(zAxisLimitSwitchPin),
       isStepperInSpeedMode_(false),
-      zStopHit(false),
       time_z_cmd(0)
 {
 
@@ -36,16 +37,9 @@ void Arm::init() {
     zAxisStepper_.setMaxSpeed(STEPPER_MAX_SPEED/2);
     zAxisStepper_.setPullInSpeed(10);
     zAxisStepper_.setInverseRotation(true);
-
-    pinMode(zAxisLimitSwitchPin_, INPUT_PULLUP);
-    pinMode(zAxisEnablePin, OUTPUT);
+    gpios.setMode(zAxisLimitSwitchPin_, INPUT_PULLUP);
+    gpios.setMode(zAxisEnablePin, OUTPUT);
     enableZMotor(true);
-
-    auto zstop_hit_isr = [this]() {
-        zStopHit = true;
-        
-    };
-    attachInterrupt(zAxisLimitSwitchPin_, zstop_hit_isr, FALLING);
     homeZ();
     time_z_cmd = millis();
 }
@@ -57,24 +51,21 @@ void Arm::homeZ() {
     zAxisStepper_.setPosition(-10000);
     zAxisStepper_.setTargetAbs(0);
     controller.moveAsync(zAxisStepper_);
-    while (!zStopHit){}     // wait to hit stop switch
+    while (gpios.read(zAxisLimitSwitchPin_)){}     // wait to hit stop switch
     zAxisStepper_.setMaxSpeed(STEPPER_MAX_SPEED);
     zAxisStepper_.setPosition(5*STEP_PER_MM);
     zAxisStepper_.setTargetAbs(0);  // go down 5mm to release stop switch
     controller.move(zAxisStepper_);
-    zStopHit = false;
 }
 
 void Arm::loop() {
-    if(zStopHit) {
-        while (digitalRead(zAxisLimitSwitchPin_) == LOW)
+    if(gpios.read(zAxisLimitSwitchPin_) == LOW) {
+        while (gpios.read(zAxisLimitSwitchPin_) == LOW)
         {
             zAxisStepper_.setTargetRel(-5*STEP_PER_MM);
             controller.move(zAxisStepper_);
         }
-        zStopHit = false;
         homeZ();
-        zStopHit = false;
     }
 
     if(millis() - time_z_cmd > TIME_STEPPER_DISABLE) {
@@ -84,9 +75,9 @@ void Arm::loop() {
 
 void Arm::enableZMotor(bool enable) {
     if (enable) {
-        digitalWrite(zAxisEnablePin, LOW);
+        gpios.write(zAxisEnablePin, LOW);
     } else {
-        digitalWrite(zAxisEnablePin, HIGH);
+        gpios.write(zAxisEnablePin, HIGH);
     }
 }
 

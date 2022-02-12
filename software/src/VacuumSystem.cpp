@@ -1,31 +1,27 @@
 #include "VacuumSystem.h"
 
 #include <Arduino.h>
+#include "Gpios.h"
+#include "Pressure.h"
 
-VacuumSystem::VacuumSystem(unsigned int pumpPin, unsigned int valvePin, unsigned int vacuumSensorPin)
-    : pumpPin_(pumpPin), valvePin_(valvePin), vacuumSensorPin_(vacuumSensorPin), vacuumDuration_(0), releaseDuration_(0) {}
-
-VacuumSystem::VacuumSystem(unsigned int pumpPin, unsigned int valvePin, unsigned int vacuumDuration, unsigned int releaseDuration)
-    : pumpPin_(pumpPin), valvePin_(valvePin), vacuumSensorPin_(-1), vacuumDuration_(vacuumDuration), releaseDuration_(releaseDuration) {}
+VacuumSystem::VacuumSystem(Gpios::Signal pumpPin, Gpios::Signal valvePin, Pressure::Sensor vacuumSensor)
+    : pumpPin_(pumpPin), valvePin_(valvePin), vacuumSensor(vacuumSensor){}
 
 void VacuumSystem::init() {
-    pinMode(pumpPin_, OUTPUT);
-    pinMode(valvePin_, OUTPUT);
-    if (vacuumSensorPin_ != -1) {
-        pinMode((uint32_t)vacuumSensorPin_, INPUT);
-    }
+    gpios.setMode(pumpPin_, OUTPUT);
+    gpios.setMode(valvePin_, OUTPUT);
     release();
     openValve(false);
 }
 
 void VacuumSystem::startPump(bool start){
-    digitalWrite(pumpPin_, start ? HIGH : LOW);
+    gpios.write(pumpPin_, start ? HIGH : LOW);
     isPumpOn_ = start;
     updateState();
 }
 
 void VacuumSystem::openValve(bool open){
-    digitalWrite(valvePin_, open ? HIGH : LOW);
+    gpios.write(valvePin_, open ? HIGH : LOW);
     isValveOpen_ = open;
     updateState();
 }
@@ -41,27 +37,15 @@ void VacuumSystem::release() {
 }
 
 bool VacuumSystem::isReleased() {
-    if (vacuumSensorPin_ != -1) {
-        return analogRead(vacuumSensorPin_) >= PRESSURE_SENSOR_ATMO_VALUE;
-    } else {
-        return isReleasing_ && (millis() - releaseStartTime_) >= releaseDuration_;
-    }
+    return getPressure() >= PRESSURE_SENSOR_ATMO_VALUE;
 }
 
 bool VacuumSystem::isVacuumed() {
-    if (vacuumSensorPin_ != -1) {
-        return analogRead(vacuumSensorPin_) <= PRESSURE_SENSOR_VACUUMED_VALUE;
-    } else {
-        return isSucking_ && (millis() - suckStartTime_) >= vacuumDuration_;
-    }
+    return getPressure() <= PRESSURE_SENSOR_VACUUMED_VALUE;
 }
 
-int VacuumSystem::pressure() {
-    if (vacuumSensorPin_ != -1) {
-        return analogRead(vacuumSensorPin_);
-    } else {
-        return 0;
-    }
+int VacuumSystem::getPressure() {
+    return pressure.read(vacuumSensor);
 }
 
 void VacuumSystem::updateState(){
