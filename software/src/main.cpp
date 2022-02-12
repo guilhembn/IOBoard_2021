@@ -7,6 +7,7 @@
 #include "procedures/ProcedureManager.h"
 #include "Gpios.h"
 #include "Pressure.h"
+#include "Display.h"
 
 uint32_t status_time = 0;
 
@@ -19,6 +20,9 @@ void setup() {
     gpios.setMode(Gpios::LED, OUTPUT);
     communication.init(115200);
     pressure.begin();
+    display.init();
+    display.setBrightness(3);
+    display.display(0);
     pressure.tare();
     hat.init();
     arm.init();

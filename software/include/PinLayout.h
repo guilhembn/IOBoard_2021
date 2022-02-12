@@ -14,6 +14,9 @@ constexpr uint32_t PRESSURE_HAT = PA5;
 constexpr uint32_t PRESSURE_ARM1 = PA7;
 constexpr uint32_t PRESSURE_ARM2 = PA6;
 
+constexpr uint32_t DISPLAY_CLK = PB5;
+constexpr uint32_t DISPLAY_DIO = PB4;
+
 
 #define ARM_Z_ROT_DYNAMIXEL_ID 1
 #define ARM_Y_ROT_DYNAMIXEL_ID 2
