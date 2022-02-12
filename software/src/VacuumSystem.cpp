@@ -45,7 +45,7 @@ bool VacuumSystem::isVacuumed() {
 }
 
 int VacuumSystem::getPressure() {
-    return pressure.read(vacuumSensor);
+    return pressure.read_sensor(vacuumSensor);
 }
 
 void VacuumSystem::updateState(){

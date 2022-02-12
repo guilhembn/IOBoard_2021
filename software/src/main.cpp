@@ -6,6 +6,7 @@
 #include "ducklink/Communication.h"
 #include "procedures/ProcedureManager.h"
 #include "Gpios.h"
+#include "Pressure.h"
 
 uint32_t status_time = 0;
 
@@ -17,6 +18,8 @@ void setup() {
     gpios.init();
     gpios.setMode(Gpios::LED, OUTPUT);
     communication.init(115200);
+    pressure.begin();
+    pressure.tare();
     hat.init();
     arm.init();
     procedure_manager.init();

@@ -1,13 +1,19 @@
 #ifndef PINLAYOUT_H
 #define PINLAYOUT_H
 
-#include <variant_NUCLEO_L432KC.h>
 #include <HardwareSerial.h>
+#include <Arduino.h>
 
 constexpr uint32_t ARM1_Z_DRIVER_STEP = PA1;
 constexpr uint32_t ARM1_Z_DRIVER_DIR = PB0;
 constexpr uint32_t ARM2_Z_DRIVER_STEP = PA0;
 constexpr uint32_t ARM2_Z_DRIVER_DIR = PB1;
+
+constexpr uint32_t PRESSURE_CLK = PA10;
+constexpr uint32_t PRESSURE_HAT = PA5;
+constexpr uint32_t PRESSURE_ARM1 = PA7;
+constexpr uint32_t PRESSURE_ARM2 = PA6;
+
 
 #define ARM_Z_ROT_DYNAMIXEL_ID 1
 #define ARM_Y_ROT_DYNAMIXEL_ID 2
