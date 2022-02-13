@@ -70,4 +70,5 @@ uint32_t time_z_cmd;
 
 };
 
-extern Arm arm;
+extern Arm arm1;
+extern Arm arm2;

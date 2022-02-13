@@ -18,8 +18,10 @@ constexpr uint32_t DISPLAY_CLK = PB5;
 constexpr uint32_t DISPLAY_DIO = PB4;
 
 
-#define ARM_Z_ROT_DYNAMIXEL_ID 1
-#define ARM_Y_ROT_DYNAMIXEL_ID 2
+constexpr unsigned int ARM1_Z_ROT_DYNAMIXEL_ID = 1;
+constexpr unsigned int ARM1_Y_ROT_DYNAMIXEL_ID = 2;
+constexpr unsigned int ARM2_Z_ROT_DYNAMIXEL_ID = 3;
+constexpr unsigned int ARM2_Y_ROT_DYNAMIXEL_ID = 4;
 
 #define HAT_SERVO1 PA8
 #define HAT_SERVO2 PA11

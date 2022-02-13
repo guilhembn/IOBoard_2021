@@ -1,6 +1,7 @@
 #pragma once
 
 #include "generated/messages.h"
+#include "Arm.h"
 
 enum ProcedureState {
     IDLE,
@@ -16,14 +17,20 @@ struct ProcedureParams {
 class AbstractProcedure {
     public:
     virtual ProcedureState loop() = 0;
-    virtual void setArmId(protoduck::ArmID id) {arm_id = id;}
+    virtual void setArmId(protoduck::ArmID id) {
+        if(id == protoduck::ArmID::ARM1) {
+            arm = &arm1;
+        } else {
+            arm = &arm2;
+        }
+    }
     virtual void setParam(int32_t p) {}
     virtual void reset() = 0;
     virtual protoduck::Procedure::Status getStatus() {return status;}
 
 protected:
-    AbstractProcedure(): status(protoduck::Procedure::Status::SUCCESS) {}
-    protoduck::ArmID arm_id;
+    AbstractProcedure(): arm(&arm1), status(protoduck::Procedure::Status::SUCCESS) {}
+    Arm* arm;
     protoduck::Procedure::Status status;
 };
 

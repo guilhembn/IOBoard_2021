@@ -14,6 +14,7 @@ uint32_t status_time = 0;
 protoduck::Message cmd;
 
 unsigned long lastSent = 0;
+Arm* status_arm = &arm2;
 
 void setup() {
     gpios.init();
@@ -25,7 +26,8 @@ void setup() {
     display.display(0);
     pressure.tare();
     hat.init();
-    arm.init();
+    arm1.init();
+    arm2.init();
     procedure_manager.init();
 
     for(int i=0; i<5; i++) {
@@ -37,7 +39,8 @@ void setup() {
 
 void loop() {
 
-    arm.loop();
+    arm1.loop();
+    arm2.loop();
     hat.loop();
     procedure_manager.loop();
 
@@ -45,11 +48,15 @@ void loop() {
     if (msgStatus == Communication::eMessageStatus::NEW_MSG) {
         if (cmd.msg_type() == protoduck::Message::MsgType::COMMAND) {
             if (cmd.has_arm()) {
-                arm.sendPositionCommand(Arm::eJoint::PRISMATIC_Z, std::round(cmd.arm().traZ()));
-                arm.sendPositionCommand(Arm::eJoint::REVOLUTE_Z, std::round(cmd.arm().rotZ()));
-                arm.sendPositionCommand(Arm::eJoint::REVOLUTE_Y, std::round(cmd.arm().rotY()));
-                arm.startPump(cmd.arm().pump());
-                arm.openValve(cmd.arm().valve());
+                Arm* arm = &arm1;
+                if(cmd.arm().arm_id() == protoduck::ArmID::ARM2) {
+                    arm = &arm2;
+                }
+                arm->sendPositionCommand(Arm::eJoint::PRISMATIC_Z, std::round(cmd.arm().traZ()));
+                arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, std::round(cmd.arm().rotZ()));
+                arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Y, std::round(cmd.arm().rotY()));
+                arm->startPump(cmd.arm().pump());
+                arm->openValve(cmd.arm().valve());
             } else if (cmd.has_hat()) {
                 hat.extendTo(cmd.hat().height());
                 hat.startPump(cmd.hat().pump());
@@ -65,9 +72,16 @@ void loop() {
 
     if(millis() - status_time > 200) {
         communication.sendHatStatus(hat);
-        communication.sendArmStatus(arm);
+        communication.sendArmStatus(arm1);
         communication.sendProcedureStatus(procedure_manager);
         status_time = millis();
         gpios.toggle(Gpios::LED);
+
+        //alternate arm1 and arm2 status report
+        if(status_arm == &arm1) {
+            status_arm = &arm2;
+        } else {
+            status_arm = &arm1;
+        }
     }    
 }
