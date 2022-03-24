@@ -4,8 +4,8 @@
 #include "VacuumSystem.h"
 #include "TeensyStep.h"
 
-#define DYNAMIXEL_TO_0_1 512
-#define DYNAMIXEL_TO_0_2 512
+#define ARM1_ZDYN_NEUTRAL 512   //500
+#define ARM2_ZDYN_NEUTRAL 512
 
 #define STEPPER_HOME_SPEED 1000
 #define STEPPER_MAX_ACC 5000
@@ -15,17 +15,21 @@
 
 #define TIME_STEPPER_DISABLE 30000  // stepper automatically disable after 30s
 
+class ProcHome;
+
+class Arm;
+
+extern Arm arm1;
+extern Arm arm2;
 
 class Arm{
 public:
 Arm(Gpios::Signal pumpPin, Gpios::Signal valvePin, Pressure::Sensor pressureSensor, HardwareSerial* dynamixelSerial, 
     unsigned int zAxisStepPin, unsigned int zAxisDirPin,
-    Gpios::Signal zAxisEnablePin, Gpios::Signal zAxisLimitSwitchPin, unsigned int zRotDynamixelId, unsigned int yRotDynamixelId);
+    Gpios::Signal zAxisEnablePin, Gpios::Signal zAxisLimitSwitchPin, unsigned int zRotDynamixelId, unsigned int yRotDynamixelId, StepControl& controller);
 
 void init();
 void loop();
-
-void homeZ();
 
 bool isMoving();
 
@@ -39,6 +43,7 @@ void openValve(bool open){vacuumSystem_.openValve(open);}
 bool isPumpStarted() {return vacuumSystem_.isPumpOn();}
 bool isValveOpen() {return vacuumSystem_.isValveOpen();}
 bool isZMotorEnabled() {return !digitalRead(zAxisEnablePin);}
+bool zStopStatus() {return gpios.read(zAxisLimitSwitchPin_);}
 
 enum eJoint{
     PRISMATIC_Z = 0,
@@ -47,6 +52,7 @@ enum eJoint{
 };
 
 void sendPositionCommand(const eJoint joint, const float command);
+void rotateIdle();
 float getPosition(const eJoint joint);
 int pressure() {return vacuumSystem_.getPressure();}
 
@@ -54,6 +60,15 @@ int pressure() {return vacuumSystem_.getPressure();}
 void resetZPrimaticPosition();
 
 protected:
+
+float z_rot_cmd(float input) {
+    if (this == &arm1) {
+        return input;
+    } else {
+        return ARM1_ZDYN_NEUTRAL + ARM2_ZDYN_NEUTRAL - input;
+    }
+}
+
 DynamixelSerial dynamixel_;
 HardwareSerial* dynamixelSerial_;
 unsigned int zAxisRotDynamixelId_;
@@ -65,10 +80,11 @@ Stepper zAxisStepper_;
 Gpios::Signal zAxisEnablePin;
 Gpios::Signal zAxisLimitSwitchPin_;
 bool isStepperInSpeedMode_;
+StepControl& controller;
 
 uint32_t time_z_cmd;
 
+friend ProcHome;
+
 };
 
-extern Arm arm1;
-extern Arm arm2;

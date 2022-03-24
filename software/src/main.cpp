@@ -27,13 +27,16 @@ void setup() {
     pressure.tare();
     hat.init();
     arm1.init();
+    delay(500);
     arm2.init();
     procedure_manager.init();
 
-    for(int i=0; i<5; i++) {
-        gpios.toggle(Gpios::LED);
-        delay(200);
-    }
+    // for(int i=0; i<5; i++) {
+    //     gpios.toggle(Gpios::LED);
+    //     delay(200);
+    // }
+
+    procedure_manager.setProcedure(protoduck::Procedure::Proc::HOME, protoduck::ArmID::ARM2, 0);
     
 }
 

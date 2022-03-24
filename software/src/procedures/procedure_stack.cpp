@@ -5,8 +5,8 @@ ProcStack proc_stack;
 
 ProcedureState ProcStack::loop() {
     if(current_state == State::INIT) {
-        arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 306);
-        arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Y, -180);
+        arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 820);
+        arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Y, 332);
 
         float rz = arm->getPosition(Arm::eJoint::REVOLUTE_Z);
         float ry = arm->getPosition(Arm::eJoint::REVOLUTE_Y);
@@ -31,7 +31,7 @@ ProcedureState ProcStack::loop() {
     if(current_state == State::UP) {
         auto pz = arm->getPosition(Arm::eJoint::PRISMATIC_Z);
         if(abs(drop_height - pz) < 2) {
-            arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, -100);
+            arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 412);
             current_state = State::TURN;
         }
     }

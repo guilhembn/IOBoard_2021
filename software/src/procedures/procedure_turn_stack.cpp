@@ -9,8 +9,8 @@ ProcedureState ProcTurnStack::loop() {
     static uint32_t time_mark = 0;
 
     if(current_state == State::INIT) {
-        arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 306);
-        arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Y, -180);
+        arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 820);
+        arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Y, 330);
 
         float rz = arm->getPosition(Arm::eJoint::REVOLUTE_Z);
         float ry = arm->getPosition(Arm::eJoint::REVOLUTE_Y);
@@ -35,7 +35,7 @@ ProcedureState ProcTurnStack::loop() {
     if(current_state == State::UP) {
         auto pz = arm->getPosition(Arm::eJoint::PRISMATIC_Z);
         if(abs(-40 - pz) < 2) {
-            arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Y, 240);
+            arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Y, 750);
             current_state = State::TURN_UP;
         }
     }
@@ -43,7 +43,7 @@ ProcedureState ProcTurnStack::loop() {
     if(current_state == State::TURN_UP)  {
         float ry = arm->getPosition(Arm::eJoint::REVOLUTE_Y);
         if(abs(240 - ry) < 10) {
-            arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, -100);
+            arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, -412);
             current_state = State::TURN;
         }
     }
@@ -74,7 +74,7 @@ ProcedureState ProcTurnStack::loop() {
         float pz = arm->getPosition(Arm::eJoint::PRISMATIC_Z);
         if(pz < -38) {
             arm->openValve(false);
-            arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 306);
+            arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 820);
             current_state = State::TURN_BACK;
         }
     }

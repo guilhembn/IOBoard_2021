@@ -4,19 +4,21 @@
 #include "PinLayout.h"
 #include "Gpios.h"
 
+StepControl controller;
+
 Arm arm1(Gpios::ARM1_VAC_PUMP, Gpios::ARM1_VALVE, Pressure::ARM1, &DYNAMIXELS_HALF_DUP_SERIAL,
     ARM1_Z_DRIVER_STEP, ARM1_Z_DRIVER_DIR, Gpios::ARM1_Z_DRIVER_ENABLE,
-    Gpios::ARM1_Z_LIMIT_SWITCH, ARM1_Z_ROT_DYNAMIXEL_ID, ARM1_Y_ROT_DYNAMIXEL_ID);
+    Gpios::ARM1_Z_LIMIT_SWITCH, ARM1_Z_ROT_DYNAMIXEL_ID, ARM1_Y_ROT_DYNAMIXEL_ID, controller);
 
 Arm arm2(Gpios::ARM2_VAC_PUMP, Gpios::ARM2_VALVE, Pressure::ARM2, &DYNAMIXELS_HALF_DUP_SERIAL,
     ARM2_Z_DRIVER_STEP, ARM2_Z_DRIVER_DIR, Gpios::ARM2_Z_DRIVER_ENABLE,
-    Gpios::ARM2_Z_LIMIT_SWITCH, ARM2_Z_ROT_DYNAMIXEL_ID, ARM2_Y_ROT_DYNAMIXEL_ID);
+    Gpios::ARM2_Z_LIMIT_SWITCH, ARM2_Z_ROT_DYNAMIXEL_ID, ARM2_Y_ROT_DYNAMIXEL_ID, controller);
 
-StepControl controller; 
 
 Arm::Arm(Gpios::Signal pumpPin, Gpios::Signal valvePin, Pressure::Sensor pressureSensor, HardwareSerial* dynamixelSerial, unsigned int zAxisStepPin,
          unsigned int zAxisDirPin, Gpios::Signal zAxisEnablePin, Gpios::Signal zAxisLimitSwitchPin, unsigned int zRotDynamixelId,
-         unsigned int yRotDynamixelId)
+         unsigned int yRotDynamixelId,
+         StepControl& controller)
     : dynamixelSerial_(dynamixelSerial),
       zAxisRotDynamixelId_(zRotDynamixelId),
       yAxisRotDynamixelId_(yRotDynamixelId),
@@ -25,6 +27,7 @@ Arm::Arm(Gpios::Signal pumpPin, Gpios::Signal valvePin, Pressure::Sensor pressur
       zAxisEnablePin(zAxisEnablePin),
       zAxisLimitSwitchPin_(zAxisLimitSwitchPin),
       isStepperInSpeedMode_(false),
+      controller(controller),
       time_z_cmd(0)
 {
 
@@ -32,8 +35,8 @@ Arm::Arm(Gpios::Signal pumpPin, Gpios::Signal valvePin, Pressure::Sensor pressur
 
 void Arm::init() {
     dynamixel_.init(dynamixelSerial_);
-    sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 308);
-    sendPositionCommand(Arm::eJoint::REVOLUTE_Y, 0);
+    sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 820);
+    sendPositionCommand(Arm::eJoint::REVOLUTE_Y, 512);
     vacuumSystem_.init();
 
     zAxisStepper_.setAcceleration(STEPPER_MAX_ACC);
@@ -43,33 +46,18 @@ void Arm::init() {
     gpios.setMode(zAxisLimitSwitchPin_, INPUT_PULLUP);
     gpios.setMode(zAxisEnablePin, OUTPUT);
     enableZMotor(true);
-    homeZ();
     time_z_cmd = millis();
 }
 
-void Arm::homeZ() {
-    sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 308);
-    sendPositionCommand(Arm::eJoint::REVOLUTE_Y, 0);
-    zAxisStepper_.setMaxSpeed(STEPPER_HOME_SPEED);     // slow
-    zAxisStepper_.setPosition(-10000);
-    zAxisStepper_.setTargetAbs(0);
-    controller.moveAsync(zAxisStepper_);
-    while (gpios.read(zAxisLimitSwitchPin_)){}     // wait to hit stop switch
-    zAxisStepper_.setMaxSpeed(STEPPER_MAX_SPEED);
-    zAxisStepper_.setPosition(5*STEP_PER_MM);
-    zAxisStepper_.setTargetAbs(0);  // go down 5mm to release stop switch
-    controller.move(zAxisStepper_);
-}
-
 void Arm::loop() {
-    if(gpios.read(zAxisLimitSwitchPin_) == LOW) {
-        while (gpios.read(zAxisLimitSwitchPin_) == LOW)
-        {
-            zAxisStepper_.setTargetRel(-5*STEP_PER_MM);
-            controller.move(zAxisStepper_);
-        }
-        homeZ();
-    }
+    // if(gpios.read(zAxisLimitSwitchPin_) == LOW) {
+    //     while (gpios.read(zAxisLimitSwitchPin_) == LOW)
+    //     {
+    //         zAxisStepper_.setTargetRel(-5*STEP_PER_MM);
+    //         controller.move(zAxisStepper_);
+    //     }
+    //     homeZ();
+    // }
 
     if(millis() - time_z_cmd > TIME_STEPPER_DISABLE) {
         enableZMotor(false);
@@ -103,7 +91,7 @@ void Arm::sendPositionCommand(eJoint joint, float command) {
             {
                 if(!isZMotorEnabled()) {
                     enableZMotor(true);
-                    homeZ();
+                    // TODO home Z
                 }
                 isStepperInSpeedMode_ = false;
                 int target = command * STEP_PER_MM;
@@ -113,14 +101,19 @@ void Arm::sendPositionCommand(eJoint joint, float command) {
             }
             break;
         case eJoint::REVOLUTE_Z:
-            dynamixel_.moveSpeed(zAxisRotDynamixelId_, command + DYNAMIXEL_TO_0_1, 300);
+            dynamixel_.moveSpeed(zAxisRotDynamixelId_, z_rot_cmd(command), 300);
             break;
         case eJoint::REVOLUTE_Y:
-            dynamixel_.moveSpeed(yAxisRotDynamixelId_, command + DYNAMIXEL_TO_0_2, 300);
+            dynamixel_.moveSpeed(yAxisRotDynamixelId_, z_rot_cmd(command), 300);
             break;
         default:
             break;
     }
+}
+
+void Arm::rotateIdle() {
+    sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 500);
+    sendPositionCommand(Arm::eJoint::REVOLUTE_Y, 330);
 }
 
 float Arm::getPosition(eJoint joint) {
@@ -129,10 +122,10 @@ float Arm::getPosition(eJoint joint) {
             return zAxisStepper_.getPosition() / STEP_PER_MM;
             break;
         case eJoint::REVOLUTE_Z:
-            return dynamixel_.readPosition(zAxisRotDynamixelId_) - DYNAMIXEL_TO_0_1;
+            return dynamixel_.readPosition(zAxisRotDynamixelId_);
             break;
         case eJoint::REVOLUTE_Y:
-            return dynamixel_.readPosition(yAxisRotDynamixelId_) - DYNAMIXEL_TO_0_2;
+            return dynamixel_.readPosition(yAxisRotDynamixelId_);
             break;
         default:
             break;
