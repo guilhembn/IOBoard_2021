@@ -3,6 +3,7 @@
 #include "Dynamixel/DynamixelSerial.h"
 #include "VacuumSystem.h"
 #include "TeensyStep.h"
+#include "ducklink/Communication.h"
 
 #define ARM1_ZDYN_NEUTRAL 512   //500
 #define ARM2_ZDYN_NEUTRAL 512
@@ -26,7 +27,7 @@ class Arm{
 public:
 Arm(Gpios::Signal pumpPin, Gpios::Signal valvePin, Pressure::Sensor pressureSensor, HardwareSerial* dynamixelSerial, 
     unsigned int zAxisStepPin, unsigned int zAxisDirPin,
-    Gpios::Signal zAxisEnablePin, Gpios::Signal zAxisLimitSwitchPin, unsigned int zRotDynamixelId, unsigned int yRotDynamixelId, StepControl& controller);
+    Gpios::Signal zAxisEnablePin, Gpios::Signal zAxisLimitSwitchPin, unsigned int zRotDynamixelId, unsigned int yRotDynamixelId, StepControl& controller, protoduck::ArmID arm_id);
 
 void init();
 void loop();
@@ -83,6 +84,10 @@ bool isStepperInSpeedMode_;
 StepControl& controller;
 
 uint32_t time_z_cmd;
+
+bool watchZStop;
+
+const protoduck::ArmID ARM_ID;
 
 friend ProcHome;
 

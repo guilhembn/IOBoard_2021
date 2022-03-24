@@ -44,6 +44,7 @@ ProcedureState ProcHome::loop() {
 }
 
 void ProcHome::reset() {
+    arm->enableZMotor(true);
     arm->zAxisStepper_.setPosition(0);
     arm->zAxisStepper_.setMaxSpeed(STEPPER_HOME_SPEED);     // slow
     if(arm->zStopStatus()) {

@@ -3,22 +3,26 @@
 #include <Arduino.h>
 #include "PinLayout.h"
 #include "Gpios.h"
+#include "generated/messages.h"
+
+using Errors = protoduck::Error::Errors;
+using protoduck::ArmID;
 
 StepControl controller;
 
 Arm arm1(Gpios::ARM1_VAC_PUMP, Gpios::ARM1_VALVE, Pressure::ARM1, &DYNAMIXELS_HALF_DUP_SERIAL,
     ARM1_Z_DRIVER_STEP, ARM1_Z_DRIVER_DIR, Gpios::ARM1_Z_DRIVER_ENABLE,
-    Gpios::ARM1_Z_LIMIT_SWITCH, ARM1_Z_ROT_DYNAMIXEL_ID, ARM1_Y_ROT_DYNAMIXEL_ID, controller);
+    Gpios::ARM1_Z_LIMIT_SWITCH, ARM1_Z_ROT_DYNAMIXEL_ID, ARM1_Y_ROT_DYNAMIXEL_ID, controller, ArmID::ARM1);
 
 Arm arm2(Gpios::ARM2_VAC_PUMP, Gpios::ARM2_VALVE, Pressure::ARM2, &DYNAMIXELS_HALF_DUP_SERIAL,
     ARM2_Z_DRIVER_STEP, ARM2_Z_DRIVER_DIR, Gpios::ARM2_Z_DRIVER_ENABLE,
-    Gpios::ARM2_Z_LIMIT_SWITCH, ARM2_Z_ROT_DYNAMIXEL_ID, ARM2_Y_ROT_DYNAMIXEL_ID, controller);
+    Gpios::ARM2_Z_LIMIT_SWITCH, ARM2_Z_ROT_DYNAMIXEL_ID, ARM2_Y_ROT_DYNAMIXEL_ID, controller, ArmID::ARM2);
 
 
 Arm::Arm(Gpios::Signal pumpPin, Gpios::Signal valvePin, Pressure::Sensor pressureSensor, HardwareSerial* dynamixelSerial, unsigned int zAxisStepPin,
          unsigned int zAxisDirPin, Gpios::Signal zAxisEnablePin, Gpios::Signal zAxisLimitSwitchPin, unsigned int zRotDynamixelId,
          unsigned int yRotDynamixelId,
-         StepControl& controller)
+         StepControl& controller, ArmID arm_id)
     : dynamixelSerial_(dynamixelSerial),
       zAxisRotDynamixelId_(zRotDynamixelId),
       yAxisRotDynamixelId_(yRotDynamixelId),
@@ -28,7 +32,9 @@ Arm::Arm(Gpios::Signal pumpPin, Gpios::Signal valvePin, Pressure::Sensor pressur
       zAxisLimitSwitchPin_(zAxisLimitSwitchPin),
       isStepperInSpeedMode_(false),
       controller(controller),
-      time_z_cmd(0)
+      time_z_cmd(0),
+      watchZStop(true),
+      ARM_ID(arm_id)
 {
 
 }
@@ -50,14 +56,9 @@ void Arm::init() {
 }
 
 void Arm::loop() {
-    // if(gpios.read(zAxisLimitSwitchPin_) == LOW) {
-    //     while (gpios.read(zAxisLimitSwitchPin_) == LOW)
-    //     {
-    //         zAxisStepper_.setTargetRel(-5*STEP_PER_MM);
-    //         controller.move(zAxisStepper_);
-    //     }
-    //     homeZ();
-    // }
+    if(watchZStop && gpios.read(zAxisLimitSwitchPin_) == LOW) {
+        communication.sendError(Errors::Z_STOP_TRIGGERED, static_cast<uint32_t>(ARM_ID));
+    }
 
     if(millis() - time_z_cmd > TIME_STEPPER_DISABLE) {
         enableZMotor(false);
@@ -90,8 +91,7 @@ void Arm::sendPositionCommand(eJoint joint, float command) {
         case eJoint::PRISMATIC_Z:
             {
                 if(!isZMotorEnabled()) {
-                    enableZMotor(true);
-                    // TODO home Z
+                    communication.sendError(Errors::STEPPER_DISABLED, static_cast<uint32_t>(ARM_ID));
                 }
                 isStepperInSpeedMode_ = false;
                 int target = command * STEP_PER_MM;
@@ -101,10 +101,16 @@ void Arm::sendPositionCommand(eJoint joint, float command) {
             }
             break;
         case eJoint::REVOLUTE_Z:
-            dynamixel_.moveSpeed(zAxisRotDynamixelId_, z_rot_cmd(command), 300);
+            {
+                auto ret = dynamixel_.moveSpeed(zAxisRotDynamixelId_, z_rot_cmd(command), 300);
+                if(ret == -1) {communication.sendError(Errors::DYNAMIXEL_ERROR, zAxisRotDynamixelId_);}
+            }
             break;
         case eJoint::REVOLUTE_Y:
-            dynamixel_.moveSpeed(yAxisRotDynamixelId_, z_rot_cmd(command), 300);
+            {
+                auto ret = dynamixel_.moveSpeed(yAxisRotDynamixelId_, z_rot_cmd(command), 300);
+                if(ret == -1) {communication.sendError(Errors::DYNAMIXEL_ERROR, yAxisRotDynamixelId_);}
+            }
             break;
         default:
             break;
@@ -122,10 +128,18 @@ float Arm::getPosition(eJoint joint) {
             return zAxisStepper_.getPosition() / STEP_PER_MM;
             break;
         case eJoint::REVOLUTE_Z:
-            return dynamixel_.readPosition(zAxisRotDynamixelId_);
+            {
+                auto pos = dynamixel_.readPosition(zAxisRotDynamixelId_);
+                if(pos == -1) {communication.sendError(Errors::DYNAMIXEL_ERROR, zAxisRotDynamixelId_);}
+                return pos;
+            }
             break;
         case eJoint::REVOLUTE_Y:
-            return dynamixel_.readPosition(yAxisRotDynamixelId_);
+            {
+                auto pos = dynamixel_.readPosition(yAxisRotDynamixelId_);
+                if(pos == -1) {communication.sendError(Errors::DYNAMIXEL_ERROR, yAxisRotDynamixelId_);}
+                return pos;
+            }
             break;
         default:
             break;

@@ -118,6 +118,15 @@ void Communication::sendProcedureStatus(ProcedureManager& pm) {
     send(msg);
 }
 
+void Communication::sendError(::protoduck::Error::Errors e, uint32_t param) {
+    protoduck::Message msg;
+    msg.set_msg_type(protoduck::Message::MsgType::STATUS);
+    auto& error = msg.mutable_error();
+    error.set_error(e);
+    error.set_param(param);
+    send(msg);
+}
+
 void Communication::send(protoduck::Message msg) {
     msg.set_source(protoduck::Message::Agent::DIFF);
     msg.set_msg_type(protoduck::Message::MsgType::STATUS);
