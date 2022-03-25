@@ -22,7 +22,8 @@ void setup() {
     communication.init(115200);
     pressure.begin();
     display.init();
-    display.setBrightness(3);
+    display.clearScreen();
+    display.setBrightness(7);
     display.display(0);
     pressure.tare();
     hat.init();
@@ -69,6 +70,14 @@ void loop() {
                 auto param = cmd.procedure().get_param();
                 auto arm_id = cmd.procedure().get_arm_id();
                 procedure_manager.setProcedure(procedure, arm_id, param);
+            } else if(cmd.has_hmi()) {
+                uint32_t led = cmd.hmi().get_led();
+                uint32_t score = cmd.hmi().get_hmi_display();
+                display.display(score);
+                // LED
+                gpios.write(Gpios::Signal::LED_R, led & (1<<0));
+                gpios.write(Gpios::Signal::LED_G, led & (1<<1));
+                gpios.write(Gpios::Signal::LED_B, led & (1<<2));
             }
         }
     }

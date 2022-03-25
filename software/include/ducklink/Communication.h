@@ -27,6 +27,7 @@ class Communication {
     void sendHatStatus(Hat& hat);
     void sendProcedureStatus(ProcedureManager& pm);
     void sendError(::protoduck::Error::Errors e, uint32_t param);
+    void sendHMI();
 
    protected:
     void send(::protoduck::Message msg);
