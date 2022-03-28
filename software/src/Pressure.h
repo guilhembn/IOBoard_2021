@@ -1,7 +1,9 @@
 #pragma once
 #include <Arduino.h>
+#include "Display.h"
 
 constexpr int N = 3;
+constexpr uint32_t PRESSURE_PERIOD = 200;
 
 class Pressure {
 
@@ -13,14 +15,13 @@ public:
     Pressure(int clk, std::array<int, N> dios):_clk(clk), _dio(dios), _gain(GAIN128){};
 
     enum Sensor {
-        ARM1,
-        ARM2,
-        HAT,
+        ARM1 = 0,
+        ARM2 = 1,
+        HAT = 2,
     };
 
     float read_sensor(Sensor sensor) {
-        auto values = read_avg(2);
-        return values[static_cast<int>(sensor)];
+        return last_read[static_cast<int>(sensor)]/1000.0;
     }
 
 
@@ -85,7 +86,7 @@ public:
         }
         
         for(int i=0; i<N; i++) {
-            ret[i] = 1.0 * values[i];
+            ret[i] = 0.01 * values[i];
         }
 
         return ret;
@@ -115,12 +116,21 @@ public:
         }
     }
 
+    void loop() {
+        if(millis() - last_time > PRESSURE_PERIOD) {
+            last_read = read_avg(2);
+            last_time = millis();
+        }
+    }
+
 
 private:
     int _clk;
     std::array<int, N> _dio;
     int _gain;
     std::array<float, N> _offsets;
+    uint32_t last_time;
+    std::array<float, N> last_read;
 };
 
 

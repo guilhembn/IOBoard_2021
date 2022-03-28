@@ -22,7 +22,7 @@ class VacuumSystem{
     void openValve(bool open = true);
     bool isPumpOn() { return isPumpOn_;}
     bool isValveOpen() {return isValveOpen_;}
-    int getPressure();
+    float getPressure();
 
     protected:
     void updateState();

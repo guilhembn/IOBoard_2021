@@ -84,8 +84,9 @@ void Communication::sendArmStatus(Arm& arm) {
     float yRotPosition = arm.getPosition(Arm::eJoint::REVOLUTE_Y);
     bool pumpEnabled = arm.isPumpStarted();
     bool valveClosed = arm.isValveOpen();
-    unsigned int pressureValue = arm.pressure();
+    auto pressureValue = arm.pressure();
 
+    armStatus.set_arm_id(arm.getId());
     armStatus.set_traZ(zPriPosition);
     armStatus.set_rotZ(zRotPosition);
     armStatus.set_rotY(yRotPosition);
@@ -101,7 +102,7 @@ void Communication::sendHatStatus(Hat& hat) {
     hatStatus.set_height(hat.getHeight());
     hatStatus.set_pump(hat.isPumpStarted());
     hatStatus.set_valve(hat.isValveOpen());
-    hatStatus.set_pressure(0.);
+    hatStatus.set_pressure(hat.pressure());
     send(msg);
 }
 

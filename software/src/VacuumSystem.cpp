@@ -44,7 +44,7 @@ bool VacuumSystem::isVacuumed() {
     return getPressure() <= PRESSURE_SENSOR_VACUUMED_VALUE;
 }
 
-int VacuumSystem::getPressure() {
+float VacuumSystem::getPressure() {
     return pressure.read_sensor(vacuumSensor);
 }
 

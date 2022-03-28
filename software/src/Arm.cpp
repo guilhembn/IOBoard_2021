@@ -53,6 +53,11 @@ void Arm::init() {
     gpios.setMode(zAxisEnablePin, OUTPUT);
     enableZMotor(true);
     time_z_cmd = millis();
+
+    // for(int i=0; i<3; i++) {
+    //     last_commands[0] = 0;
+    // }
+    
 }
 
 void Arm::loop() {
@@ -67,6 +72,7 @@ void Arm::loop() {
 
 void Arm::enableZMotor(bool enable) {
     if (enable) {
+        reset_stepper_timeout();
         gpios.write(zAxisEnablePin, LOW);
     } else {
         gpios.write(zAxisEnablePin, HIGH);
@@ -97,7 +103,7 @@ void Arm::sendPositionCommand(eJoint joint, float command) {
                 int target = command * STEP_PER_MM;
                 zAxisStepper_.setTargetAbs(target);
                 controller.moveAsync(zAxisStepper_);
-                time_z_cmd = millis();
+                reset_stepper_timeout();
             }
             break;
         case eJoint::REVOLUTE_Z:
@@ -115,6 +121,17 @@ void Arm::sendPositionCommand(eJoint joint, float command) {
         default:
             break;
     }
+    last_commands[static_cast<int>(joint)] = command;
+}
+
+bool Arm::isNear(eJoint joint, float precision) {
+    float pos = getPosition(joint);
+    float cmd = last_commands[static_cast<int>(joint)];
+
+    if(abs(cmd - pos) < precision) {
+        return true;
+    }
+    return false;
 }
 
 void Arm::rotateIdle() {
@@ -131,14 +148,16 @@ float Arm::getPosition(eJoint joint) {
             {
                 auto pos = dynamixel_.readPosition(zAxisRotDynamixelId_);
                 if(pos == -1) {communication.sendError(Errors::DYNAMIXEL_ERROR, zAxisRotDynamixelId_);}
-                return pos;
+                return z_rot_cmd(pos);
+                //return pos;
             }
             break;
         case eJoint::REVOLUTE_Y:
             {
                 auto pos = dynamixel_.readPosition(yAxisRotDynamixelId_);
                 if(pos == -1) {communication.sendError(Errors::DYNAMIXEL_ERROR, yAxisRotDynamixelId_);}
-                return pos;
+                return z_rot_cmd(pos);
+                //return pos;
             }
             break;
         default:

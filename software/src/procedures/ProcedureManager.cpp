@@ -27,16 +27,31 @@ void ProcedureManager::loop() {
         if(state != ProcedureState::RUNNING) {
             //communication.sendProcedureStatus(*this);
         }
-    }    
+    } else {
+        if(!procedures_queue.empty()) {
+            auto p = procedures_queue.front();
+            setProcedure(p);
+            procedures_queue.pop();
+        }
+    }
 }
 
-int ProcedureManager::setProcedure(protoduck::Procedure::Proc proc, protoduck::ArmID arm_id, uint32_t param) {
+int ProcedureManager::queueProcedure(protoduck::Procedure::Proc proc, protoduck::ArmID arm_id, uint32_t param) {
+    if(procedures_queue.full()) {
+        return -1;
+    }
+    
+    params = {proc, arm_id, param};
+    procedures_queue.push(params);
+    return 0;
+}
+
+int ProcedureManager::setProcedure(ProcedureParams& params) {
     if(state == RUNNING) {
         return -1;
     }
-    params = {proc, arm_id, param};
-    procedures[(int)params.proc]->setArmId(arm_id);
-    procedures[(int)params.proc]->setParam(param);
+    procedures[(int)params.proc]->setArmId(params.arm_id);
+    procedures[(int)params.proc]->setParam(params.param);
     procedures[(int)params.proc]->reset();
     state = ProcedureState::RUNNING;
     return 0;

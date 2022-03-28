@@ -19,6 +19,7 @@ Arm* status_arm = &arm2;
 void setup() {
     gpios.init();
     gpios.setMode(Gpios::LED, OUTPUT);
+    Serial.begin(115200);
     communication.init(115200);
     pressure.begin();
     display.init();
@@ -37,12 +38,14 @@ void setup() {
     //     delay(200);
     // }
 
-    procedure_manager.setProcedure(protoduck::Procedure::Proc::HOME, protoduck::ArmID::ARM2, 0);
+    procedure_manager.queueProcedure(protoduck::Procedure::Proc::HOME, protoduck::ArmID::ARM1, 0);
+    procedure_manager.queueProcedure(protoduck::Procedure::Proc::HOME, protoduck::ArmID::ARM2, 0);
     
 }
 
 void loop() {
 
+    pressure.loop();
     arm1.loop();
     arm2.loop();
     hat.loop();
@@ -69,7 +72,7 @@ void loop() {
                 protoduck::Procedure::Proc procedure = cmd.procedure().get_proc();
                 auto param = cmd.procedure().get_param();
                 auto arm_id = cmd.procedure().get_arm_id();
-                procedure_manager.setProcedure(procedure, arm_id, param);
+                procedure_manager.queueProcedure(procedure, arm_id, param);
             } else if(cmd.has_hmi()) {
                 uint32_t led = cmd.hmi().get_led();
                 uint32_t score = cmd.hmi().get_hmi_display();
@@ -84,7 +87,7 @@ void loop() {
 
     if(millis() - status_time > 200) {
         communication.sendHatStatus(hat);
-        communication.sendArmStatus(arm1);
+        communication.sendArmStatus(*status_arm);
         communication.sendProcedureStatus(procedure_manager);
         status_time = millis();
         gpios.toggle(Gpios::LED);

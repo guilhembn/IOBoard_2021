@@ -5,13 +5,7 @@ ProcStack proc_stack;
 
 ProcedureState ProcStack::loop() {
     if(current_state == State::INIT) {
-        arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 820);
-        arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Y, 332);
-
-        float rz = arm->getPosition(Arm::eJoint::REVOLUTE_Z);
-        float ry = arm->getPosition(Arm::eJoint::REVOLUTE_Y);
-
-        if(abs(306-rz) < 5 && abs(-180-ry) < 5) {
+        if(arm->isNear(Arm::eJoint::REVOLUTE_Z, 5) && arm->isNear(Arm::eJoint::REVOLUTE_Y, 5)) {
             arm->startPump(true);
             arm->sendPositionCommand(Arm::eJoint::PRISMATIC_Z, -130);
             current_state = State::DOWN;
@@ -19,7 +13,7 @@ ProcedureState ProcStack::loop() {
     }
 
     if(current_state == State::DOWN) {
-        if(arm->pressure() > 160) {
+        if(arm->pressure() < -50) {
             auto zpos = arm->getPosition(Arm::eJoint::PRISMATIC_Z);
             arm->sendPositionCommand(Arm::eJoint::PRISMATIC_Z, zpos);
             //delay(200);
@@ -37,8 +31,7 @@ ProcedureState ProcStack::loop() {
     }
 
     if(current_state == State::TURN)  {
-        float rz = arm->getPosition(Arm::eJoint::REVOLUTE_Z);
-        if(abs(-100 - rz) < 10) {
+        if(arm->isNear(Arm::eJoint::REVOLUTE_Z, 10)) {
             arm->startPump(false);
             arm->openValve(true);
             current_state = State::DROP;
@@ -46,7 +39,7 @@ ProcedureState ProcStack::loop() {
     }
 
     if(current_state == State::DROP)  {
-        if(arm->pressure() < 130) {
+        if(arm->pressure() > -50) {
             arm->openValve(false);
             status = protoduck::Procedure::Status::SUCCESS;
             return ProcedureState::IDLE;
@@ -64,4 +57,7 @@ void ProcStack::setParam(int32_t p) {
 void ProcStack::reset() {
     current_state = State::INIT;
     status = protoduck::Procedure::Status::RUNNING;
+    arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 820);
+    arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Y, 332);
+    other_arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 600);
 }

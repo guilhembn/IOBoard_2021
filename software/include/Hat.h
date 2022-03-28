@@ -28,6 +28,7 @@ void startPump(bool start){vacuumSystem_.startPump(start);}
 void openValve(bool open){vacuumSystem_.openValve(open);}
 bool isPumpStarted() {return vacuumSystem_.isPumpOn();}
 bool isValveOpen() {return vacuumSystem_.isValveOpen();}
+float pressure() {return vacuumSystem_.getPressure();}
 
 bool isTaken();
 bool isReleased();

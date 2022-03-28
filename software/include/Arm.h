@@ -53,9 +53,12 @@ enum eJoint{
 };
 
 void sendPositionCommand(const eJoint joint, const float command);
+bool isNear(eJoint joint, float precision);
 void rotateIdle();
 float getPosition(const eJoint joint);
-int pressure() {return vacuumSystem_.getPressure();}
+float pressure() {return vacuumSystem_.getPressure();}
+
+protoduck::ArmID getId() { return ARM_ID;}
 
 // void setZPrimsaticSpeed(int speed);
 void resetZPrimaticPosition();
@@ -69,6 +72,8 @@ float z_rot_cmd(float input) {
         return ARM1_ZDYN_NEUTRAL + ARM2_ZDYN_NEUTRAL - input;
     }
 }
+
+void reset_stepper_timeout() {time_z_cmd = millis();}
 
 DynamixelSerial dynamixel_;
 HardwareSerial* dynamixelSerial_;
@@ -86,6 +91,8 @@ StepControl& controller;
 uint32_t time_z_cmd;
 
 bool watchZStop;
+
+float last_commands[3];
 
 const protoduck::ArmID ARM_ID;
 
