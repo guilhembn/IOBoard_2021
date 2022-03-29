@@ -15,7 +15,7 @@ ProcedureState ProcUnstack::loop() {
 
     if(current_state == State::TURN_IN) {
         if(arm->isNear(Arm::eJoint::REVOLUTE_Z, 10)) {
-            arm->sendPositionCommand(Arm::eJoint::PRISMATIC_Z, -70);
+            arm->sendPositionCommand(Arm::eJoint::PRISMATIC_Z, -65);
             arm->startPump(true);
             current_state = State::DOWN;
             setTimeout(4000);

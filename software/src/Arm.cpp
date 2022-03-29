@@ -108,13 +108,13 @@ void Arm::sendPositionCommand(eJoint joint, float command) {
             break;
         case eJoint::REVOLUTE_Z:
             {
-                auto ret = dynamixel_.moveSpeed(zAxisRotDynamixelId_, z_rot_cmd(command), 300);
+                auto ret = dynamixel_.moveSpeed(zAxisRotDynamixelId_, z_rot_cmd(command), 600);
                 if(ret == -1) {communication.sendError(Errors::DYNAMIXEL_ERROR, zAxisRotDynamixelId_);}
             }
             break;
         case eJoint::REVOLUTE_Y:
             {
-                auto ret = dynamixel_.moveSpeed(yAxisRotDynamixelId_, z_rot_cmd(command), 300);
+                auto ret = dynamixel_.moveSpeed(yAxisRotDynamixelId_, z_rot_cmd(command), 600);
                 if(ret == -1) {communication.sendError(Errors::DYNAMIXEL_ERROR, yAxisRotDynamixelId_);}
             }
             break;
