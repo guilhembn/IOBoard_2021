@@ -7,7 +7,7 @@
 ProcedureManager procedure_manager;
 
 void ProcedureManager::init() {
-    params = {
+    current_params = {
         protoduck::Procedure::Proc::HOME,
         protoduck::ArmID::ARM1,
         0
@@ -22,8 +22,8 @@ void ProcedureManager::init() {
 }
 
 void ProcedureManager::loop() {
-    auto current_proc = procedures[(int)params.proc];
     if(state == ProcedureState::RUNNING) {
+        auto current_proc = procedures[(int)current_params.proc];
         state = current_proc->loop();
         if(current_proc->isTimeout()) {
             current_proc->setFailed();
@@ -47,7 +47,7 @@ int ProcedureManager::queueProcedure(protoduck::Procedure::Proc proc, protoduck:
         return -1;
     }
     
-    params = {proc, arm_id, param};
+    ProcedureParams params = {proc, arm_id, param};
     procedures_queue.push(params);
     return 0;
 }
@@ -56,6 +56,7 @@ int ProcedureManager::setProcedure(ProcedureParams& params) {
     if(state == RUNNING) {
         return -1;
     }
+    current_params = params;
     procedures[(int)params.proc]->setArmId(params.arm_id);
     procedures[(int)params.proc]->setParam(params.param);
     procedures[(int)params.proc]->base_reset();
@@ -64,7 +65,7 @@ int ProcedureManager::setProcedure(ProcedureParams& params) {
 }
 
 protoduck::Procedure::Status ProcedureManager::getStatus() {
-    auto proc = procedures[(int)params.proc];
+    auto proc = procedures[(int)current_params.proc];
     if(proc != nullptr) {
         return proc->getStatus();
     } else {

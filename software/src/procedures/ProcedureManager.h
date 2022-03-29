@@ -74,7 +74,7 @@ public:
     void init();
     void loop();
     int queueProcedure(protoduck::Procedure::Proc proc, protoduck::ArmID arm_id, uint32_t param);
-    ProcedureParams getParams() {return params;}
+    ProcedureParams getParams() {return current_params;}
     protoduck::Procedure::Status getStatus();
 
 private:
@@ -85,7 +85,7 @@ private:
     AbstractProcedure* procedures[4];
 
     ProcedureState state;
-    ProcedureParams params;
+    ProcedureParams current_params;
 
     etl::queue<ProcedureParams, QUEUE_SIZE, etl::memory_model::MEMORY_MODEL_SMALL> procedures_queue;
 };
