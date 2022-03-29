@@ -22,8 +22,14 @@ void ProcedureManager::init() {
 }
 
 void ProcedureManager::loop() {
+    auto current_proc = procedures[(int)params.proc];
     if(state == ProcedureState::RUNNING) {
-        state = procedures[(int)params.proc]->loop();
+        state = current_proc->loop();
+        if(current_proc->isTimeout()) {
+            current_proc->setFailed();
+            current_proc->relax();
+            state = ProcedureState::IDLE;
+        }
         if(state != ProcedureState::RUNNING) {
             //communication.sendProcedureStatus(*this);
         }
@@ -52,7 +58,7 @@ int ProcedureManager::setProcedure(ProcedureParams& params) {
     }
     procedures[(int)params.proc]->setArmId(params.arm_id);
     procedures[(int)params.proc]->setParam(params.param);
-    procedures[(int)params.proc]->reset();
+    procedures[(int)params.proc]->base_reset();
     state = ProcedureState::RUNNING;
     return 0;
 }

@@ -28,14 +28,43 @@ class AbstractProcedure {
         }
     }
     virtual void setParam(int32_t p) {}
-    virtual void reset() = 0;
+    void base_reset() {
+        timeout = 0;
+        reset();
+    }
+    
     virtual protoduck::Procedure::Status getStatus() {return status;}
+    bool isTimeout() {
+        return timeout != 0 && millis() - last_mark > timeout;
+    }
+
+    void setFailed() {
+        status = protoduck::Procedure::Status::FAILURE;
+    }
+
+    void relax() {
+        arm1.startPump(false);
+        arm1.openValve(false);
+        arm2.startPump(false);
+        arm2.openValve(false);
+    }
 
 protected:
     AbstractProcedure(): arm(&arm1), other_arm(&arm2), status(protoduck::Procedure::Status::SUCCESS) {}
+    virtual void reset() = 0;
+    // reset timeout
+    void timeoutReset() {last_mark = millis();}
+    // set and reset timeout
+    void setTimeout(uint32_t t) {
+        timeout = t;
+        timeoutReset();
+    }
+
     Arm* arm;
     Arm* other_arm;
     protoduck::Procedure::Status status;
+    uint32_t last_mark;
+    uint32_t timeout;
 };
 
 

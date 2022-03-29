@@ -17,9 +17,7 @@ private:
         UP_HAT,
         CLEAR_HAT,
         TURN_BACK,
-        LOWER,
         DROP,
-        HAT_UP,
     };
 
     State current_state;
