@@ -76,6 +76,7 @@ void loop() {
             } else if(cmd.has_hmi()) {
                 uint32_t led = cmd.hmi().get_led();
                 uint32_t score = cmd.hmi().get_hmi_display();
+                display.clearScreen();
                 display.display(score);
                 // LED
                 gpios.write(Gpios::Signal::LED_R, led & (1<<0));
@@ -89,6 +90,7 @@ void loop() {
         communication.sendHatStatus(hat);
         communication.sendArmStatus(*status_arm);
         communication.sendProcedureStatus(procedure_manager);
+        communication.sendHMI();
         status_time = millis();
         gpios.toggle(Gpios::LED);
 

@@ -132,7 +132,7 @@ void Communication::sendHMI() {
     protoduck::Message msg;
     msg.set_msg_type(protoduck::Message::MsgType::STATUS);
     auto& hmi = msg.mutable_hmi();
-    hmi.set_bouton(gpios.read(Gpios::Signal::BUTTON));
+    hmi.set_bouton(!gpios.read(Gpios::Signal::BUTTON));
     hmi.set_color(gpios.read(Gpios::Signal::COLOR));
     hmi.set_tirette(gpios.read(Gpios::Signal::TIRETTE));
     // led and display not set.
