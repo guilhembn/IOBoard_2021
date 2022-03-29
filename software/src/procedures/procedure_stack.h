@@ -5,7 +5,9 @@ public:
     ProcStack(): AbstractProcedure() {}
     ProcedureState loop();
     void setParam(int32_t p);
-    void reset();
+
+protected:
+    ProcedureState reset();
 
 private:
     enum State {

@@ -30,7 +30,7 @@ ProcedureState ProcTurnStack::loop() {
         if(arm->isNear(Arm::eJoint::PRISMATIC_Z, 2)) {
             arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Y, 750);
             current_state = State::TURN_UP;
-            setTimeout(1000);
+            setTimeout(2000);
         }
     }
 
@@ -38,7 +38,7 @@ ProcedureState ProcTurnStack::loop() {
         if(arm->isNear(Arm::eJoint::REVOLUTE_Y, 10)) {
             arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 412);
             current_state = State::TURN;
-            setTimeout(1000);
+            setTimeout(2000);
         }
     }
 
@@ -69,7 +69,7 @@ ProcedureState ProcTurnStack::loop() {
             arm->openValve(false);
             arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 820);
             current_state = State::TURN_BACK;
-            setTimeout(1000);
+            setTimeout(2000);
         }
     }
 
@@ -78,7 +78,7 @@ ProcedureState ProcTurnStack::loop() {
             hat.startPump(false);
             hat.openValve(true);
             current_state = State::DROP;
-            setTimeout(1000);
+            setTimeout(2000);
         }
     }
 
@@ -97,11 +97,16 @@ void ProcTurnStack::setParam(int32_t p) {
     drop_height = p;
 }
 
-void ProcTurnStack::reset() {
+ProcedureState ProcTurnStack::reset() {
+    if(!arm->isZMotorEnabled()) {
+        setFailed();
+        return ProcedureState::IDLE;
+    }
     current_state = State::INIT;
     status = protoduck::Procedure::Status::RUNNING;
     arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 820);
     arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Y, 330);
     other_arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 700);
     setTimeout(1000);
+    return ProcedureState::RUNNING;
 }

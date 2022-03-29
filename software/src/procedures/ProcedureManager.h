@@ -28,9 +28,9 @@ class AbstractProcedure {
         }
     }
     virtual void setParam(int32_t p) {}
-    void base_reset() {
+    ProcedureState base_reset() {
         timeout = 0;
-        reset();
+        return reset();
     }
     
     virtual protoduck::Procedure::Status getStatus() {return status;}
@@ -51,7 +51,7 @@ class AbstractProcedure {
 
 protected:
     AbstractProcedure(): arm(&arm1), other_arm(&arm2), status(protoduck::Procedure::Status::SUCCESS) {}
-    virtual void reset() = 0;
+    virtual ProcedureState reset() = 0;
     // reset timeout
     void timeoutReset() {last_mark = millis();}
     // set and reset timeout
@@ -80,7 +80,7 @@ public:
 private:
     static constexpr size_t QUEUE_SIZE = 5;
     void sendProcedureStatus();
-    int setProcedure(ProcedureParams& params);
+    int setProcedure(ProcedureParams params);
 
     AbstractProcedure* procedures[4];
 

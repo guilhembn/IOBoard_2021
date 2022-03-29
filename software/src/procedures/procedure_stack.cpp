@@ -15,9 +15,6 @@ ProcedureState ProcStack::loop() {
 
     if(current_state == State::DOWN) {
         if(arm->pressure() < -50) {
-            auto zpos = arm->getPosition(Arm::eJoint::PRISMATIC_Z);
-            arm->sendPositionCommand(Arm::eJoint::PRISMATIC_Z, zpos);
-            //delay(200);
             arm->sendPositionCommand(Arm::eJoint::PRISMATIC_Z, drop_height);
             current_state = State::UP;
             setTimeout(4000);
@@ -25,8 +22,7 @@ ProcedureState ProcStack::loop() {
     }
 
     if(current_state == State::UP) {
-        auto pz = arm->getPosition(Arm::eJoint::PRISMATIC_Z);
-        if(abs(drop_height - pz) < 2) {
+        if(arm->isNear(Arm::eJoint::PRISMATIC_Z, 2)) {
             arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 412);
             current_state = State::TURN;
             setTimeout(2000);
@@ -38,7 +34,7 @@ ProcedureState ProcStack::loop() {
             arm->startPump(false);
             arm->openValve(true);
             current_state = State::DROP;
-            setTimeout(1000);
+            setTimeout(2000);
         }
     }
 
@@ -58,11 +54,16 @@ void ProcStack::setParam(int32_t p) {
     drop_height = p;
 }
 
-void ProcStack::reset() {
+ProcedureState ProcStack::reset() {
+    if(!arm->isZMotorEnabled()) {
+        setFailed();
+        return ProcedureState::IDLE;
+    }
     current_state = State::INIT;
     status = protoduck::Procedure::Status::RUNNING;
     arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 820);
     arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Y, 332);
     other_arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 700);
     setTimeout(1000);
+    return ProcedureState::RUNNING;
 }

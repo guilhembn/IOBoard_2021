@@ -43,7 +43,7 @@ void startPump(bool start){vacuumSystem_.startPump(start);}
 void openValve(bool open){vacuumSystem_.openValve(open);}
 bool isPumpStarted() {return vacuumSystem_.isPumpOn();}
 bool isValveOpen() {return vacuumSystem_.isValveOpen();}
-bool isZMotorEnabled() {return !digitalRead(zAxisEnablePin);}
+bool isZMotorEnabled() {return !gpios.read(zAxisEnablePin);}
 bool zStopStatus() {return gpios.read(zAxisLimitSwitchPin_);}
 
 enum eJoint{
