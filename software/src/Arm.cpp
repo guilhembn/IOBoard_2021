@@ -41,8 +41,8 @@ Arm::Arm(Gpios::Signal pumpPin, Gpios::Signal valvePin, Pressure::Sensor pressur
 
 void Arm::init() {
     dynamixel_.init(dynamixelSerial_);
-    sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 820);
-    sendPositionCommand(Arm::eJoint::REVOLUTE_Y, 512);
+    //sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 820);
+    //sendPositionCommand(Arm::eJoint::REVOLUTE_Y, 512);
     vacuumSystem_.init();
 
     zAxisStepper_.setAcceleration(STEPPER_MAX_ACC);
