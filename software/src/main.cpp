@@ -32,15 +32,6 @@ void setup() {
     delay(500);
     arm2.init();
     procedure_manager.init();
-
-    // for(int i=0; i<5; i++) {
-    //     gpios.toggle(Gpios::LED);
-    //     delay(200);
-    // }
-
-    //procedure_manager.queueProcedure(protoduck::Procedure::Proc::HOME, protoduck::ArmID::ARM2, 0);
-    //procedure_manager.queueProcedure(protoduck::Procedure::Proc::HOME, protoduck::ArmID::ARM1, 0);
-    
 }
 
 void loop() {
