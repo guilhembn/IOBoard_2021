@@ -8,13 +8,16 @@
 #define ARM1_ZDYN_NEUTRAL 512   //500
 #define ARM2_ZDYN_NEUTRAL 512
 
+#define ARM1_YDYN_NEUTRAL 512   //500
+#define ARM2_YDYN_NEUTRAL 502
+
 #define STEPPER_HOME_SPEED 1000
 #define STEPPER_MAX_ACC 10000
 #define STEPPER_MAX_SPEED 4000
 
 #define STEP_PER_MM 41.18
 
-#define TIME_STEPPER_DISABLE 30000  // stepper automatically disable after 30s
+#define TIME_STEPPER_DISABLE 100000  // stepper automatically disable after 100s
 
 class ProcHome;
 
@@ -70,6 +73,14 @@ float z_rot_cmd(float input) {
         return input;
     } else {
         return ARM1_ZDYN_NEUTRAL + ARM2_ZDYN_NEUTRAL - input;
+    }
+}
+
+float y_rot_cmd(float input) {
+    if (this == &arm1) {
+        return input;
+    } else {
+        return ARM1_YDYN_NEUTRAL + ARM2_YDYN_NEUTRAL - input;
     }
 }
 
