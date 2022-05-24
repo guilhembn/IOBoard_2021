@@ -9,7 +9,7 @@ Communication::Communication(HardwareSerial* serial) : receiveState_(Communicati
 
 void Communication::init(int baudrate) { serial_->begin(baudrate); }
 
-Communication::eMessageStatus Communication::checkMessages(protoduck::Message& msg) {
+Communication::eMessageStatus Communication::checkMessages(Message& msg) {
     msg.clear();
     uint8_t byte;
     size_t readLen;
@@ -76,7 +76,7 @@ Communication::eMessageStatus Communication::checkMessages(protoduck::Message& m
 }
 
 void Communication::sendArmStatus(Arm& arm) {
-    protoduck::Message msg;
+    Message msg;
     protoduck::Arm& armStatus = msg.mutable_arm();
 
     float zPriPosition = arm.getPosition(Arm::eJoint::PRISMATIC_Z);
@@ -97,7 +97,7 @@ void Communication::sendArmStatus(Arm& arm) {
 }
 
 void Communication::sendHatStatus(Hat& hat) {
-    protoduck::Message msg;
+    Message msg;
     protoduck::Hat& hatStatus = msg.mutable_hat();
     hatStatus.set_height(hat.getHeight());
     hatStatus.set_pump(hat.isPumpStarted());
@@ -107,8 +107,8 @@ void Communication::sendHatStatus(Hat& hat) {
 }
 
 void Communication::sendProcedureStatus(ProcedureManager& pm) {
-    protoduck::Message msg;
-    msg.set_msg_type(protoduck::Message::MsgType::STATUS);
+    Message msg;
+    msg.set_msg_type(Message::MsgType::STATUS);
     auto& procedure = msg.mutable_procedure();
     procedure.set_status(pm.getStatus());
     auto p = pm.getParams();
@@ -120,8 +120,8 @@ void Communication::sendProcedureStatus(ProcedureManager& pm) {
 }
 
 void Communication::sendError(::protoduck::Error::Errors e, uint32_t param) {
-    protoduck::Message msg;
-    msg.set_msg_type(protoduck::Message::MsgType::STATUS);
+    Message msg;
+    msg.set_msg_type(Message::MsgType::STATUS);
     auto& error = msg.mutable_error();
     error.set_error(e);
     error.set_param(param);
@@ -129,8 +129,8 @@ void Communication::sendError(::protoduck::Error::Errors e, uint32_t param) {
 }
 
 void Communication::sendHMI() {
-    protoduck::Message msg;
-    msg.set_msg_type(protoduck::Message::MsgType::STATUS);
+    Message msg;
+    msg.set_msg_type(Message::MsgType::STATUS);
     auto& hmi = msg.mutable_hmi();
     hmi.set_bouton(!gpios.read(Gpios::Signal::BUTTON));
     hmi.set_color(gpios.read(Gpios::Signal::COLOR));
@@ -139,9 +139,9 @@ void Communication::sendHMI() {
     send(msg);
 }
 
-void Communication::send(protoduck::Message msg) {
-    msg.set_source(protoduck::Message::Agent::DIFF);
-    msg.set_msg_type(protoduck::Message::MsgType::STATUS);
+void Communication::send(Message msg) {
+    msg.set_source(Message::Agent::DIFF);
+    msg.set_msg_type(Message::MsgType::STATUS);
     BytesWriteBuffer sendBuffer;
     sendBuffer.clear();
     msg.serialize(sendBuffer);

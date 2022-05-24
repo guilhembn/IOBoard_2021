@@ -33,7 +33,7 @@ void ProcedureManager::loop() {
             current_proc->relax();
             state = ProcedureState::IDLE;
         }
-        if(state != ProcedureState::RUNNING) {
+        if(state == ProcedureState::IDLE) {
             //communication.sendProcedureStatus(*this);
             current_proc = nullptr;
         }

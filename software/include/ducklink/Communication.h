@@ -14,6 +14,8 @@ class ProcedureManager;
 
 #define NUM_MESSAGES 10
 
+using Message = protoduck::Message<5, 4>;
+
 class Communication {
    public:
     Communication(HardwareSerial* communicationSerial);
@@ -21,7 +23,7 @@ class Communication {
     void init(int baudrate);
 
     enum eMessageStatus { NO_MSG, NEW_MSG, COM_ERROR };
-    eMessageStatus checkMessages(::protoduck::Message& msg);
+    eMessageStatus checkMessages(Message& msg);
 
     void sendArmStatus(Arm& arm);
     void sendHatStatus(Hat& hat);
@@ -30,7 +32,7 @@ class Communication {
     void sendHMI();
 
    protected:
-    void send(::protoduck::Message msg);
+    void send(Message msg);
 
     enum eRcvState { START_1, START_2, LEN, PAYLOAD, CHECKSUM };
     eRcvState receiveState_;

@@ -66,6 +66,6 @@ ProcedureState ProcHome::reset() {
     arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 820);
     arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Y, 512);
 
-    status = protoduck::Procedure::Status::RUNNING;
+    status = protoduck::Procedure::Status::RUNNING_FREE;
     return ProcedureState::RUNNING;
 }

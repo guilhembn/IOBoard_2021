@@ -25,6 +25,7 @@ ProcedureState ProcStack::loop() {
         if(arm->isNear(Arm::eJoint::PRISMATIC_Z, 2)) {
             arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 412);
             current_state = State::TURN;
+            status = protoduck::Procedure::Status::RUNNING_FREE;
             setTimeout(2000);
         }
     }

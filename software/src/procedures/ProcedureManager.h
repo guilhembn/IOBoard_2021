@@ -7,6 +7,7 @@
 enum ProcedureState {
     IDLE,
     RUNNING,
+    RUNNING_FREE,
 };
 
 struct ProcedureParams {
