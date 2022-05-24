@@ -83,7 +83,7 @@ private:
     void sendProcedureStatus();
     int setProcedure(ProcedureParams params);
 
-    AbstractProcedure* procedures[4];
+    AbstractProcedure* procedures[8];
 
     ProcedureState state;
     ProcedureParams current_params;

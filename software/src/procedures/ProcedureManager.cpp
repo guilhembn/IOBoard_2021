@@ -3,6 +3,7 @@
 #include "procedure_turn_stack.h"
 #include "procedure_home.h"
 #include "procedure_unstack.h"
+#include "procedure_halfunstack.h"
 #include "ducklink/Communication.h"
 
 ProcedureManager procedure_manager;
@@ -22,6 +23,10 @@ void ProcedureManager::init() {
     procedures[(int)protoduck::Procedure::Proc::PUT_ON_STACK] = &proc_stack;
     procedures[(int)protoduck::Procedure::Proc::TURN_AND_PUT_ON_STACK] = &proc_turn_stack;
     procedures[(int)protoduck::Procedure::Proc::TAKE_FROM_STACK] = &proc_unstack;
+    procedures[(int)protoduck::Procedure::Proc::DROPPER] = nullptr;
+    procedures[(int)protoduck::Procedure::Proc::TROMPE] = nullptr;
+    procedures[(int)protoduck::Procedure::Proc::LANGUE] = nullptr;
+    procedures[(int)protoduck::Procedure::Proc::HALF_UNSTACK] = &proc_half_unstack;
 }
 
 void ProcedureManager::loop() {

@@ -63,7 +63,8 @@ void loop() {
                 protoduck::Procedure::Proc procedure = cmd.procedure().get_proc();
                 auto param = cmd.procedure().get_param();
                 auto arm_id = cmd.procedure().get_arm_id();
-                if((int)procedure <= (int)protoduck::Procedure::Proc::TAKE_FROM_STACK) {
+                if((int)procedure <= (int)protoduck::Procedure::Proc::TAKE_FROM_STACK ||
+                    (int)procedure == (int)protoduck::Procedure::Proc::HALF_UNSTACK) {
                     procedure_manager.queueProcedure(procedure, arm_id, param);
                 }
             } else if(cmd.has_hmi()) {
