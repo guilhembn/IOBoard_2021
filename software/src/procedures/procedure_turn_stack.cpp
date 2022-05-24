@@ -9,6 +9,7 @@ ProcedureState ProcTurnStack::loop() {
     if(current_state == State::INIT) {
         if(arm->isNear(Arm::eJoint::REVOLUTE_Z, 5) && arm->isNear(Arm::eJoint::REVOLUTE_Y, 5)) {
             arm->startPump(true);
+            arm->openValve(false);
             arm->sendPositionCommand(Arm::eJoint::PRISMATIC_Z, -135);
             current_state = State::DOWN;
             setTimeout(5000);
@@ -47,6 +48,7 @@ ProcedureState ProcTurnStack::loop() {
         if(arm->isNear(Arm::eJoint::PRISMATIC_Z, 10)) {
             arm->sendPositionCommand(Arm::eJoint::PRISMATIC_Z, 0);
             hat.startPump(true);
+            arm->openValve(false);
             current_state = State::UP_HAT;
             setTimeout(3000);
         }
