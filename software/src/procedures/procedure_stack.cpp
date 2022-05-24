@@ -31,6 +31,14 @@ ProcedureState ProcStack::loop() {
 
     if(current_state == State::TURN)  {
         if(arm->isNear(Arm::eJoint::REVOLUTE_Z, 10)) {
+            start_wait = millis();
+            current_state = State::WAIT;
+            setTimeout(2000);
+        }
+    }
+    
+    if(current_state == State::WAIT)  {
+        if(millis() - start_wait > 500) {
             arm->startPump(false);
             arm->openValve(true);
             current_state = State::DROP;
