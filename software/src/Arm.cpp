@@ -65,9 +65,9 @@ void Arm::loop() {
         communication.sendError(Errors::Z_STOP_TRIGGERED, static_cast<uint32_t>(ARM_ID));
     }
 
-    if(millis() - time_z_cmd > TIME_STEPPER_DISABLE) {
-        enableZMotor(false);
-    }
+    // if(millis() - time_z_cmd > TIME_STEPPER_DISABLE) {
+    //     enableZMotor(false);
+    // }
 }
 
 void Arm::enableZMotor(bool enable) {
