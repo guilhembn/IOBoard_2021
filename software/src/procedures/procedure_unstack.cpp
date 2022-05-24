@@ -15,8 +15,9 @@ ProcedureState ProcUnstack::loop() {
 
     if(current_state == State::TURN_IN) {
         if(arm->isNear(Arm::eJoint::REVOLUTE_Z, 10)) {
-            arm->sendPositionCommand(Arm::eJoint::PRISMATIC_Z, -65);
+            arm->sendPositionCommand(Arm::eJoint::PRISMATIC_Z, height);
             arm->startPump(true);
+            arm->openValve(false);
             current_state = State::DOWN;
             setTimeout(4000);
         }
@@ -83,7 +84,7 @@ ProcedureState ProcUnstack::reset() {
     status = protoduck::Procedure::Status::RUNNING;
     other_arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 700);
     arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Y, 332);
-    arm->sendPositionCommand(Arm::eJoint::PRISMATIC_Z, height);
+    arm->sendPositionCommand(Arm::eJoint::PRISMATIC_Z, min(height+30, 0L));
     setTimeout(5000);
     return ProcedureState::RUNNING;
 }
