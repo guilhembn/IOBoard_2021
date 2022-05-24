@@ -156,7 +156,7 @@ float Arm::getPosition(eJoint joint) {
             {
                 auto pos = dynamixel_.readPosition(yAxisRotDynamixelId_);
                 if(pos == -1) {communication.sendError(Errors::DYNAMIXEL_ERROR, yAxisRotDynamixelId_);}
-                return z_rot_cmd(pos);
+                return y_rot_cmd(pos);
                 //return pos;
             }
             break;
