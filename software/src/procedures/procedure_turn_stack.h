@@ -4,6 +4,7 @@ class ProcTurnStack: public AbstractProcedure {
 public:
     ProcTurnStack(): AbstractProcedure() {}
     ProcedureState loop();
+    void leave_fail();
     void setParam(int32_t p);
 protected:
     ProcedureState reset();
@@ -16,6 +17,7 @@ private:
         TURN_UP,
         TURN,
         UP_HAT,
+        TRANSFER_HAT,
         CLEAR_HAT,
         TURN_BACK,
         DROP,

@@ -12,7 +12,7 @@ ProcedureState ProcTurnStack::loop() {
             arm->openValve(false);
             arm->sendPositionCommand(Arm::eJoint::PRISMATIC_Z, -135);
             current_state = State::DOWN;
-            setTimeout(5000);
+            setTimeout(4000);
         }
     }
 
@@ -46,6 +46,10 @@ ProcedureState ProcTurnStack::loop() {
 
     if(current_state == State::TURN)  {
         if(arm->isNear(Arm::eJoint::PRISMATIC_Z, 10)) {
+            if(arm->pressure() > -50) { // hexa dropped at some point...
+                setFailed();
+                return ProcedureState::IDLE;
+            }
             arm->sendPositionCommand(Arm::eJoint::PRISMATIC_Z, 0);
             hat.startPump(true);
             arm->openValve(false);
@@ -58,13 +62,18 @@ ProcedureState ProcTurnStack::loop() {
         if(hat.pressure() < -50) {
             arm->openValve(true);
             arm->startPump(false);
+            current_state = State::TRANSFER_HAT;
+            setTimeout(2000);
+        }
+    }
+    
+    if(current_state == State::TRANSFER_HAT) {
+        if(arm->pressure() > -50) {
             arm->sendPositionCommand(Arm::eJoint::PRISMATIC_Z, -40);
             current_state = State::CLEAR_HAT;
             setTimeout(2000);
         }
     }
-
-//WAIT a bit more ???
 
     if(current_state == State::CLEAR_HAT) {
         float pz = arm->getPosition(Arm::eJoint::PRISMATIC_Z);
@@ -112,4 +121,10 @@ ProcedureState ProcTurnStack::reset() {
     other_arm->sendPositionCommand(Arm::eJoint::REVOLUTE_Z, 700);
     setTimeout(1000);
     return ProcedureState::RUNNING;
+}
+
+void ProcTurnStack::leave_fail() {
+    arm->sendPositionCommand(Arm::eJoint::PRISMATIC_Z, -50);
+    arm->startPump(false);
+    arm->openValve(false);
 }

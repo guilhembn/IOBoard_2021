@@ -19,6 +19,7 @@ struct ProcedureParams {
 class AbstractProcedure {
     public:
     virtual ProcedureState loop() = 0;
+    virtual void leave_fail() {};
     virtual void setArmId(protoduck::ArmID id) {
         if(id == protoduck::ArmID::ARM1) {
             arm = &arm1;
@@ -41,6 +42,7 @@ class AbstractProcedure {
 
     void setFailed() {
         status = protoduck::Procedure::Status::FAILURE;
+        leave_fail();
     }
 
     void relax() {
